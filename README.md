@@ -41,6 +41,20 @@ index c30f093..03b7c4c 100755
 $ gem install git-gsub
 ```
 
+## Escaping special characters
+
+`git-gsub` uses `sed` internally, so escaping is same as it.
+
+If you want to replace `git/gsub` with `svn/gsub`, the command will be
+
+```
+$ git gsub "git\/gsub" "svn\/gsub"
+```
+
+## Supported platforms
+
+- Mac OS X
+
 ## Contributing
 
 1. Fork it ( http://github.com/<my-github-username>/git-gsub/fork )
