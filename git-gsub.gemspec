@@ -8,9 +8,9 @@ Gem::Specification.new do |spec|
   spec.version       = Git::Gsub::VERSION
   spec.authors       = ["Fujimura Daisuke"]
   spec.email         = ["me@fujimuradaisuke.com"]
-  spec.summary       = %q{git-gsub}
-  spec.description   = %q{git-gusb}
-  spec.homepage      = ""
+  spec.summary       = %q{A Git subcommand to do gsub in a repository}
+  spec.description   = %q{A Git subcommand to do gsub in a repository}
+  spec.homepage      = "https://github.com/fujimura/git-gsub"
   spec.license       = "MIT"
 
   spec.files         = `git ls-files -z`.split("\x0")
