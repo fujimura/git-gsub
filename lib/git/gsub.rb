@@ -17,14 +17,16 @@ module Git
     end
 
     def self.gsub *args
-      from, to, path, = args
+      from, to, path, = args.map do |arg|
+        Shellwords.escape arg if arg
+      end
 
       target_files = (`git grep -l #{from} #{path}`).each_line.map(&:chomp).join ' '
 
       if system_support_gsed?
-        system %|gsed -i s/#{Shellwords.escape from}/#{Shellwords.escape to}/g #{target_files}|
+        system %|gsed -i s/#{from}/#{to}/g #{target_files}|
       else
-        system %|sed -i -e s/#{Shellwords.escape from}/#{Shellwords.escape to}/g #{target_files}|
+        system %|sed -i -e s/#{from}/#{to}/g #{target_files}|
       end
     end
 
