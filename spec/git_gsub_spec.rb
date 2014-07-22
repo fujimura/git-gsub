@@ -8,7 +8,7 @@ describe 'git-gsub' do
     Dir.mktmpdir do |dir|
       filename = "FOO"
       Dir.chdir dir do
-        `echo "#{content}" >> #{filename}`
+        File.open(filename, 'w') { |f| f << content }
         `git init`
         `git add .`
         `git commit -m init`
@@ -26,7 +26,7 @@ describe 'git-gsub' do
   end
 
   it 'should escape well' do
-    run_in_directory_with_a_file %|<h1 *class="foo">| do |filename|
+    run_in_directory_with_a_file %|<h1 class="foo">| do |filename|
       Git::Gsub.gsub %|<h1 class="foo">|, %|<h1 class="bar">|
       file = File.read(filename).chomp
       expect(file).to eq %|<h1 class="bar">|
