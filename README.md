@@ -1,4 +1,4 @@
-# git-gsub [![Gem Version](https://badge.fury.io/rb/git-gsub.svg)](http://badge.fury.io/rb/git-gsub)
+# git-gsub [![Gem Version](https://badge.fury.io/rb/git-gsub.svg)](http://badge.fury.io/rb/git-gsub)[![Build Status](https://travis-ci.org/fujimura/git-gsub.svg)](https://travis-ci.org/fujimura/git-gsub)
 
 A Git subcommand to do gsub in a repository
 
