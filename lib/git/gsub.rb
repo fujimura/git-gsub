@@ -28,9 +28,9 @@ module Git
       target_files = (`git grep -l #{from} #{path}`).each_line.map(&:chomp).join ' '
 
       if system_support_gsed?
-        system %|gsed -i s/#{from}/#{to}/g #{target_files}|
+        system %|gsed -i "" s/#{from}/#{to}/g #{target_files}|
       else
-        system %|sed -i -e s/#{from}/#{to}/g #{target_files}|
+        system %|sed -i "" -e s/#{from}/#{to}/g #{target_files}|
       end
     end
 

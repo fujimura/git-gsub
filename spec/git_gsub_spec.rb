@@ -44,4 +44,11 @@ describe 'git-gsub' do
       end
     end
   end
+
+  it 'should not create backup file' do
+    run_in_directory_with_a_file "Git Subversion Bzr" do |filename|
+      Git::Gsub.gsub "Bzr", "Darcs"
+      expect(`ls`).to eql "FOO\n"
+    end
+  end
 end
