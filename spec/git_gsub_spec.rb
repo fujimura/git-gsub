@@ -10,6 +10,8 @@ describe 'git-gsub' do
       Dir.chdir dir do
         File.open(filename, 'w') { |f| f << content }
         `git init`
+        `git config --local user.email "you@example.com"`
+        `git config --local user.name "Your Name"`
         `git add .`
         `git commit -m init`
         yield filename
