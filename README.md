@@ -53,7 +53,7 @@ $ git gsub "git\/gsub" "svn\/gsub"
 
 ## Supported platforms
 
-- Mac OS X
+Maybe on many *nix like OS which has sed/gsed.
 
 ## Contributing
 
