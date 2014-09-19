@@ -34,4 +34,14 @@ describe 'git-gsub' do
       expect(file).to eq %|<h1 class="bar">|
     end
   end
+
+  it 'should raise error if second argument wasn\'t given' do
+    run_in_directory_with_a_file "Git Subversion Bzr" do |filename|
+      begin
+        Git::Gsub.gsub "Bzr"
+      rescue SystemExit => e
+        expect(e.message).to match /No argument/
+      end
+    end
+  end
 end

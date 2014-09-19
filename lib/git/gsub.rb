@@ -21,6 +21,10 @@ module Git
         Shellwords.escape arg if arg
       end
 
+      if to.nil?
+        abort "No argument to gsub was given"
+      end
+
       target_files = (`git grep -l #{from} #{path}`).each_line.map(&:chomp).join ' '
 
       if system_support_gsed?
