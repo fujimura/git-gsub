@@ -27,21 +27,19 @@ describe 'git-gsub' do
     end
   end
 
+  it 'should substitute files with case conversion' do
+    run_in_directory_with_a_file 'GitGsub git_gsub git-gsub' do |filename|
+      Git::Gsub.gsub 'GitGsub', 'SvnGsub', [], {camel: true, kebab: true, snake: true}
+      file = File.read(filename).chomp
+      expect(file).to eq 'SvnGsub svn_gsub svn-gsub'
+    end
+  end
+
   it 'should escape well' do
     run_in_directory_with_a_file %(<h1 class="foo">) do |filename|
       Git::Gsub.gsub %(<h1 class="foo">), %(<h1 class="bar">)
       file = File.read(filename).chomp
       expect(file).to eq %(<h1 class="bar">)
-    end
-  end
-
-  it 'should raise error if second argument wasn\'t given' do
-    run_in_directory_with_a_file 'Git Subversion Bzr' do |_filename|
-      begin
-        Git::Gsub.gsub 'Bzr'
-      rescue SystemExit => e
-        expect(e.message).to match /No argument/
-      end
     end
   end
 
