@@ -6,9 +6,9 @@ require 'English'
 
 module Git
   module Gsub
-    def self.run
+    def self.run(argv)
       options = {}
-      OptionParser.new do |opts|
+      OptionParser.new([]) do |opts|
         # TODO
         opts.banner = 'Usage: example.rb [options]'
 
@@ -28,16 +28,20 @@ module Git
           options[:kebab] = true
         end
 
+        opts.on('--rename') do |_v|
+          options[:rename] = true
+        end
+
         opts.on('--dry-run') do |_v|
           options[:dry] = true
         end
-      end.parse!
+      end.parse!(argv)
 
       if options[:version]
         version
       else
-        from, to, *paths = ARGV
-        gsub(from, to, paths, options)
+        from, to, *paths = argv
+        Commands::Gsub.new(from, to, paths, options).run
       end
     end
 
@@ -45,40 +49,61 @@ module Git
       puts Git::Gsub::VERSION
     end
 
-    def self.gsub(from, to, paths=[], options={})
-      commands = []
-      commands << build_commands(from, to, paths)
+    module Commands
+      class Command
+        attr_accessor :from, :to, :paths, :options
 
-      commands << build_commands(from.camelcase, to.camelcase, paths) if options[:camel]
-      commands << build_commands(from.underscore, to.underscore, paths) if options[:snake]
-      commands << build_commands(from.underscore.dasherize, to.underscore.dasherize, paths) if options[:kebab]
+        def initialize(from, to, paths = [], options = {})
+          @from = from
+          @to = to
+          @paths = paths
+          @options = options
+        end
 
-      if options[:dry]
-        commands.each { |c| puts c }
-      else
-        commands.each { |c| system c }
+        def run_commands(commands)
+          if options[:dry]
+            commands.each { |c| puts c }
+          else
+            commands.each { |c| system c }
+          end
+        end
+
+        def system_support_gsed?
+          `which gsed`
+          $CHILD_STATUS.success?
+        end
+
+        def args
+          args = []
+          args << [from, to]
+          args << [from.camelcase, to.camelcase] if options[:camel]
+          args << [from.underscore, to.underscore] if options[:snake]
+          args << [from.underscore.dasherize, to.underscore.dasherize] if options[:kebab]
+
+          args.compact
+        end
       end
-    end
 
-    def self.build_commands(from, to, paths)
-      abort 'No argument to gsub was given' if to.nil?
+      class Gsub < Command
+        def run
+          commands = args.map { |from, to| build_commands(from, to, paths) }
+          run_commands commands
+        end
 
-      from, to, *paths = [from, to, *paths].map {|s| Shellwords.escape s }
+        def build_commands(from, to, paths = [], _options = {})
+          abort 'No argument to gsub was given' if to.nil?
 
-      target_files = `git grep -l #{from} #{paths.join ' '}`.each_line.map(&:chomp).join ' '
+          from, to, *paths = [from, to, *paths].map { |s| Shellwords.escape s }
 
-      if system_support_gsed?
-        %(gsed -i s/#{from}/#{to}/g #{target_files})
-      else
-        %(sed -i "" -e s/#{from}/#{to}/g #{target_files})
+          target_files = `git grep -l #{from} #{paths.join ' '}`.each_line.map(&:chomp).join ' '
+
+          if system_support_gsed?
+            %(gsed -i s/#{from}/#{to}/g #{target_files})
+          else
+            %(sed -i "" -e s/#{from}/#{to}/g #{target_files})
+          end
+        end
       end
-    end
-
-    private
-
-    def self.system_support_gsed?
-      `which gsed`
-      $CHILD_STATUS.success?
     end
   end
 end
