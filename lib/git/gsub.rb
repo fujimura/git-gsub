@@ -17,7 +17,7 @@ module Git
     end
 
     def self.gsub *args
-      from, to, paths = args.map do |arg|
+      from, to, *paths = args.map do |arg|
         Shellwords.escape arg if arg
       end
 
