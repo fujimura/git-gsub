@@ -7,40 +7,55 @@ require 'English'
 module Git
   module Gsub
     def self.run(argv)
+      opts = OptionParser.new
+
+      self.class.module_eval do
+        define_method(:usage) do |msg = nil|
+          puts opts.to_s
+          puts "error: #{msg}" if msg
+          exit 1
+        end
+      end
+
       options = {}
-      OptionParser.new([]) do |opts|
-        # TODO
-        opts.banner = 'Usage: example.rb [options]'
+      opts.on('-v', '--version', 'Print version') do |_v|
+        options[:version] = true
+      end
 
-        opts.on('-v', '--version') do |_v|
-          options[:version] = true
-        end
+      opts.on('--snake', 'Substitute snake-cased expressions') do |_v|
+        options[:snake] = true
+      end
 
-        opts.on('--snake') do |_v|
-          options[:snake] = true
-        end
+      opts.on('--camel', 'Substitute camel-cased expressions') do |_v|
+        options[:camel] = true
+      end
 
-        opts.on('--camel') do |_v|
-          options[:camel] = true
-        end
+      opts.on('--kebab', 'Substitute kebab-cased expressions') do |_v|
+        options[:kebab] = true
+      end
 
-        opts.on('--kebab') do |_v|
-          options[:kebab] = true
-        end
+      opts.on('--rename', 'Rename files along with substitution') do |_v|
+        options[:rename] = true
+      end
 
-        opts.on('--rename') do |_v|
-          options[:rename] = true
-        end
+      opts.on('--dry-run', 'Print commands to be run') do |_v|
+        options[:dry] = true
+      end
 
-        opts.on('--dry-run') do |_v|
-          options[:dry] = true
-        end
-      end.parse!(argv)
+      opts.banner = 'Usage: git gsub [options] FROM TO [PATHS]'
+
+      begin
+        args = opts.parse(argv)
+      rescue OptionParser::InvalidOption => e
+        usage e.message
+      end
 
       if options[:version]
         version
       else
-        from, to, *paths = argv
+        from, to, *paths = args
+        usage 'No FROM given' unless from
+        usage 'No TO given' unless to
         Commands::Gsub.new(from, to, paths, options).run
         Commands::Rename.new(from, to, paths, options).run if options[:rename]
       end
@@ -92,8 +107,6 @@ module Git
         end
 
         def build_commands(from, to, paths = [], _options = {})
-          abort 'No argument to gsub was given' if to.nil?
-
           from, to, *paths = [from, to, *paths].map { |s| Shellwords.escape s }
 
           target_files = `git grep -l #{from} #{paths.join ' '}`.each_line.map(&:chomp).join ' '
