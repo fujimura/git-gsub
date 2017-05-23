@@ -4,9 +4,9 @@ require 'git/gsub'
 require 'pry'
 
 describe 'git-gsub' do
-  def run_in_directory_with_a_file content
+  def run_in_directory_with_a_file(content)
     Dir.mktmpdir do |dir|
-      filename = "FOO"
+      filename = 'FOO'
       Dir.chdir dir do
         File.open(filename, 'w') { |f| f << content }
         `git init`
@@ -20,25 +20,25 @@ describe 'git-gsub' do
   end
 
   it 'should substitute files' do
-    run_in_directory_with_a_file "Git Subversion Bzr" do |filename|
-      Git::Gsub.gsub "Bzr", "Mercurial"
+    run_in_directory_with_a_file 'Git Subversion Bzr' do |filename|
+      Git::Gsub.gsub 'Bzr', 'Mercurial'
       file = File.read(filename).chomp
-      expect(file).to eq "Git Subversion Mercurial"
+      expect(file).to eq 'Git Subversion Mercurial'
     end
   end
 
   it 'should escape well' do
-    run_in_directory_with_a_file %|<h1 class="foo">| do |filename|
-      Git::Gsub.gsub %|<h1 class="foo">|, %|<h1 class="bar">|
+    run_in_directory_with_a_file %(<h1 class="foo">) do |filename|
+      Git::Gsub.gsub %(<h1 class="foo">), %(<h1 class="bar">)
       file = File.read(filename).chomp
-      expect(file).to eq %|<h1 class="bar">|
+      expect(file).to eq %(<h1 class="bar">)
     end
   end
 
   it 'should raise error if second argument wasn\'t given' do
-    run_in_directory_with_a_file "Git Subversion Bzr" do |filename|
+    run_in_directory_with_a_file 'Git Subversion Bzr' do |_filename|
       begin
-        Git::Gsub.gsub "Bzr"
+        Git::Gsub.gsub 'Bzr'
       rescue SystemExit => e
         expect(e.message).to match /No argument/
       end
@@ -46,8 +46,8 @@ describe 'git-gsub' do
   end
 
   it 'should not create backup file' do
-    run_in_directory_with_a_file "Git Subversion Bzr" do |filename|
-      Git::Gsub.gsub "Bzr", "Darcs"
+    run_in_directory_with_a_file 'Git Subversion Bzr' do |_filename|
+      Git::Gsub.gsub 'Bzr', 'Darcs'
       expect(`ls`).to eql "FOO\n"
     end
   end

@@ -1,4 +1,4 @@
-require "git/gsub/version"
+require 'git/gsub/version'
 require 'shellwords'
 
 module Git
@@ -16,21 +16,19 @@ module Git
       puts Git::Gsub::VERSION
     end
 
-    def self.gsub *args
+    def self.gsub(*args)
       from, to, *paths = args.map do |arg|
         Shellwords.escape arg if arg
       end
 
-      if to.nil?
-        abort "No argument to gsub was given"
-      end
+      abort 'No argument to gsub was given' if to.nil?
 
-      target_files = (`git grep -l #{from} #{paths.join ' '}`).each_line.map(&:chomp).join ' '
+      target_files = `git grep -l #{from} #{paths.join ' '}`.each_line.map(&:chomp).join ' '
 
       if system_support_gsed?
-        system %|gsed -i s/#{from}/#{to}/g #{target_files}|
+        system %(gsed -i s/#{from}/#{to}/g #{target_files})
       else
-        system %|sed -i "" -e s/#{from}/#{to}/g #{target_files}|
+        system %(sed -i "" -e s/#{from}/#{to}/g #{target_files})
       end
     end
 
@@ -38,7 +36,7 @@ module Git
 
     def self.system_support_gsed?
       `which gsed`
-      $?.success?
+      $CHILD_STATUS.success?
     end
   end
 end
