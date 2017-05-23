@@ -42,6 +42,7 @@ module Git
       else
         from, to, *paths = argv
         Commands::Gsub.new(from, to, paths, options).run
+        Commands::Rename.new(from, to, paths, options).run if options[:rename]
       end
     end
 
@@ -102,6 +103,19 @@ module Git
           else
             %(sed -i "" -e s/#{from}/#{to}/g #{target_files})
           end
+        end
+      end
+
+      class Rename < Command
+        def run
+          commands = args.map { |from, to| build_commands(from, to, paths) }
+          run_commands commands
+        end
+
+        def build_commands(from, to, paths = [], _options = {})
+          from, to, *paths = [from, to, *paths].map { |s| Shellwords.escape s }
+
+          %(rename -p 's/#{from}/#{to}/g' `git ls-files #{paths.join ' '}`)
         end
       end
     end
