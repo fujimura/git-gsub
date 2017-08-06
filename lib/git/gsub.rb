@@ -102,11 +102,11 @@ module Git
 
       class Gsub < Command
         def run
-          commands = args.map { |from, to| build_commands(from, to, paths) }
+          commands = args.map { |from, to| build_command(from, to, paths) }
           run_commands commands
         end
 
-        def build_commands(from, to, paths = [], _options = {})
+        def build_command(from, to, paths = [], _options = {})
           from, to, *paths = [from, to, *paths].map { |s| Shellwords.escape s }
 
           target_files = `git grep -l #{from} #{paths.join ' '}`.each_line.map(&:chomp).join ' '
@@ -121,11 +121,11 @@ module Git
 
       class Rename < Command
         def run
-          commands = args.map { |from, to| build_commands(from, to, paths) }
+          commands = args.map { |from, to| build_command(from, to, paths) }
           run_commands commands
         end
 
-        def build_commands(from, to, paths = [], _options = {})
+        def build_command(from, to, paths = [], _options = {})
           from, to, *paths = [from, to, *paths].map { |s| Shellwords.escape s }
 
           %(rename -p 's/#{from}/#{to}/g' `git ls-files #{paths.join ' '}`)
