@@ -111,7 +111,7 @@ $ gem install git-gsub
 
 ## Supported platforms
 
-Maybe on many *nix like OS which has sed/gsed.
+Maybe on many *nix like OS which has perl and rename.
 
 ## Contributing
 
