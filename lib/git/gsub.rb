@@ -120,7 +120,7 @@ module Git
         def build_command(from, to, paths = [], _options = {})
           from, to, *paths = [from, to, *paths].map { |s| Shellwords.escape s }
 
-          %[for f in $(git ls-files #{paths.join ' '} | grep #{from}); do mv $f $(echo $f | sed 's/#{from}/#{to}/g'); done]
+          %[for f in $(git ls-files #{paths.join ' '} | grep #{from}); do mkdir -p $(dirname $(echo $f | sed 's/#{from}/#{to}/g')); mv $f $(echo $f | sed 's/#{from}/#{to}/g') 2>/dev/null; done]
         end
       end
     end

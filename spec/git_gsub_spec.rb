@@ -7,6 +7,8 @@ describe 'git-gsub' do
   def run_in_directory_with_a_file(filename, content)
     Dir.mktmpdir do |dir|
       Dir.chdir dir do
+        dirname = File.dirname(filename)
+        FileUtils.mkdir_p(dirname) unless File.exists?(dirname)
         File.open(filename, 'w') { |f| f << content }
         `git init`
         `git config --local user.email "you@example.com"`
@@ -61,6 +63,12 @@ describe 'git-gsub' do
       Git::Gsub.run %w[GitGsub SvnGsub --snake --rename]
       expect(`ls`).to eql "README-svn_gsub.md\n"
       expect(File.read('README-svn_gsub.md')).to eq 'SvnGsub svn_gsub git-gsub'
+    end
+
+    run_in_directory_with_a_file 'lib/git.rb', 'puts "Git"' do
+      Git::Gsub.run %w[git svn --camel --rename]
+      expect(`ls lib`).to eql "svn.rb\n"
+      expect(File.read('lib/svn.rb')).to eq 'puts "Svn"'
     end
   end
 
