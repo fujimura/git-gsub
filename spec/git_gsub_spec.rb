@@ -50,6 +50,7 @@ describe 'git-gsub' do
     run_in_directory_with_a_file 'README-git_gsub.md', 'GitGsub git_gsub git-gsub' do
       Git::Gsub.run %w[GitGsub SvnGsub --snake --rename]
       expect(`ls`).to eql "README-svn_gsub.md\n"
+      expect(File.read('README-svn_gsub.md')).to eq 'SvnGsub svn_gsub git-gsub'
     end
   end
 
