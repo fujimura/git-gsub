@@ -21,24 +21,21 @@ describe 'git-gsub' do
   it 'should substitute files' do
     run_in_directory_with_a_file 'README.md', 'Git Subversion Bzr' do
       Git::Gsub.run %w[Bzr Mercurial]
-      file = File.read('README.md').chomp
-      expect(file).to eq 'Git Subversion Mercurial'
+      expect(File.read('README.md')).to eq 'Git Subversion Mercurial'
     end
   end
 
   it 'should substitute files with case conversion' do
     run_in_directory_with_a_file 'README.md', 'GitGsub git_gsub git-gsub' do
       Git::Gsub.run %w[GitGsub SvnGsub --camel --kebab --snake]
-      file = File.read('README.md').chomp
-      expect(file).to eq 'SvnGsub svn_gsub svn-gsub'
+      expect(File.read('README.md')).to eq 'SvnGsub svn_gsub svn-gsub'
     end
   end
 
   it 'should escape well' do
     run_in_directory_with_a_file 'README.md', %(<h1 class="foo">) do
       Git::Gsub.run [%(<h1 class="foo">), %(<h1 class="bar">)]
-      file = File.read('README.md').chomp
-      expect(file).to eq %(<h1 class="bar">)
+      expect(File.read('README.md')).to eq %(<h1 class="bar">)
     end
   end
 
