@@ -84,11 +84,6 @@ module Git
           end
         end
 
-        def system_support_gsed?
-          `which gsed`
-          $CHILD_STATUS.success?
-        end
-
         def args
           args = []
           args << [from, to]
@@ -111,11 +106,7 @@ module Git
 
           target_files = `git grep -l #{from} #{paths.join ' '}`.each_line.map(&:chomp).join ' '
 
-          if system_support_gsed?
-            %(gsed -i s/#{from}/#{to}/g #{target_files})
-          else
-            %(sed -i "" -e s/#{from}/#{to}/g #{target_files})
-          end
+          %(perl -pi -e 's/#{from}/#{to}/g' #{target_files})
         end
       end
 
