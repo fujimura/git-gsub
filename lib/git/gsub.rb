@@ -107,7 +107,7 @@ module Git
           target_files = `git grep -l #{from} #{paths.join ' '}`.each_line.map(&:chomp).join ' '
           return if target_files.empty?
 
-          %(perl -pi -e 's/#{from}/#{to}/g' #{target_files})
+          %(perl -pi -e 's{#{from}}{#{to}}g' #{target_files})
         end
       end
 

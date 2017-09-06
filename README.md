@@ -109,16 +109,6 @@ index 966eb68..0000000
 $ gem install git-gsub
 ```
 
-## Escaping special characters
-
-`git-gsub` uses `sed` internally, so escaping is same as it.
-
-If you want to replace `git/gsub` with `svn/gsub`, the command will be
-
-```
-$ git gsub "git\/gsub" "svn\/gsub"
-```
-
 ## Supported platforms
 
 Maybe on many *nix like OS which has sed/gsed.
