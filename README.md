@@ -10,7 +10,7 @@ Usage: git gsub [options] FROM TO [PATHS]
         --snake                      Substitute snake-cased expressions
         --camel                      Substitute camel-cased expressions
         --kebab                      Substitute kebab-cased expressions
-        --rename                     Rename files along with substitution
+        --rename                     Rename files
         --dry-run                    Print commands to be run
 ```
 
