@@ -55,4 +55,12 @@ describe 'git-gsub' do
       expect(`ls`).to eql "README-svn_gsub.md\n"
     end
   end
+
+  it 'should do nothing if no file found' do
+    run_in_directory_with_a_file 'README-git_gsub.md', 'GitGsub git_gsub git-gsub' do |_filename|
+      expect {
+        Git::Gsub.run %w[Atlanta Chicago --snake --rename]
+      }.not_to raise_error
+    end
+  end
 end

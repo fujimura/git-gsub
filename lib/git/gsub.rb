@@ -97,7 +97,7 @@ module Git
 
       class Gsub < Command
         def run
-          commands = args.map { |from, to| build_command(from, to, paths) }
+          commands = args.map { |from, to| build_command(from, to, paths) }.compact
           run_commands commands
         end
 
@@ -105,6 +105,7 @@ module Git
           from, to, *paths = [from, to, *paths].map { |s| Shellwords.escape s }
 
           target_files = `git grep -l #{from} #{paths.join ' '}`.each_line.map(&:chomp).join ' '
+          return if target_files.empty?
 
           %(perl -pi -e 's/#{from}/#{to}/g' #{target_files})
         end
