@@ -4,7 +4,10 @@ All notable changes to this project will be documented in this file.
 ## [Unreleased]
 ### Added
 - Add option to substitute in camel/kebab/snake case
-- Add option to rename files along with substitution
+- Add option to rename files
+### Changed
+- Do substitution with Perl, not sed to reduce platform issues
+- No escape required to command line arguments
 
 ## [0.0.5] - 2017-05-23
 ### Fixed
