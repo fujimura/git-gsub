@@ -22,15 +22,15 @@ module Git
         options[:version] = true
       end
 
-      opts.on('--snake', 'Substitute snake-cased expressions') do |_v|
+      opts.on('--snake', 'Experimental: substitute snake-cased expressions') do |_v|
         options[:snake] = true
       end
 
-      opts.on('--camel', 'Substitute camel-cased expressions') do |_v|
+      opts.on('--camel', 'Experimental: substitute camel-cased expressions') do |_v|
         options[:camel] = true
       end
 
-      opts.on('--kebab', 'Substitute kebab-cased expressions') do |_v|
+      opts.on('--kebab', 'Experimental: substitute kebab-cased expressions') do |_v|
         options[:kebab] = true
       end
 
