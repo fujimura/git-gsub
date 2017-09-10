@@ -1,7 +1,7 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
-## [Unreleased]
+## [0.0.6]
 ### Added
 - Add option to substitute in camel/kebab/snake case
 - Add option to rename files
