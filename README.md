@@ -7,10 +7,10 @@ A Git subcommand to do gsub in a repository
 ```
 Usage: git gsub [options] FROM TO [PATHS]
     -v, --version                    Print version
-        --snake                      Substitute snake-cased expressions
-        --camel                      Substitute camel-cased expressions
-        --kebab                      Substitute kebab-cased expressions
-        --rename                     Rename files
+        --snake                      Experimental: substitute snake-cased expressions
+        --camel                      Experimental: substitute camel-cased expressions
+        --kebab                      Experimental: substitute kebab-cased expressions
+        --rename                     Rename files along with substitution
         --dry-run                    Print commands to be run
 ```
 
@@ -47,6 +47,7 @@ index c30f093..03b7c4c 100755
 +Subversion::Gsub.run
 ```
 
+## Experimental features
 To substitute `CommonLisp` with `VisualBasic` with case-awareness:
 
 ```
@@ -102,6 +103,8 @@ index 966eb68..0000000
 +++ /dev/null
 @@ -1 +0,0 @@
 ```
+
+Caution: Case conversion is done with [ActiveSupport/Inflector](http://api.rubyonrails.org/classes/ActiveSupport/Inflector.html) , which substitutes `::` with `/`. This may cause unexpected result in the language other than Ruby.
 
 ## Installation
 
