@@ -3,6 +3,7 @@ require 'active_support/inflector'
 require 'optparse'
 require 'shellwords'
 require 'English'
+require "open3"
 
 module Git
   module Gsub
@@ -78,9 +79,9 @@ module Git
 
         def run_commands(commands)
           if options[:dry]
-            commands.each { |c| puts c }
+            commands.each { |args| puts args.join(' ') }
           else
-            commands.each { |c| system c }
+            commands.each { |args| Open3.capture3(*args) }
           end
         end
 
@@ -108,7 +109,8 @@ module Git
           target_files = `git grep -l #{from} #{paths.join ' '}`.each_line.map(&:chomp).join ' '
           return if target_files.empty?
 
-          %(perl -pi -e 's{#{from}}{#{to}}g' #{target_files})
+
+          ['perl', '-pi', '-e', "s{#{from}}{#{to}}g", *target_files]
         end
       end
 
