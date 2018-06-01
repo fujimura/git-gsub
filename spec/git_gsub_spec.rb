@@ -49,6 +49,11 @@ describe 'git-gsub' do
       Git::Gsub.run [%({git{svn}), %({hg{svn})]
       expect(File.read('README.md')).to eq %({hg{svn})
     end
+
+    run_in_directory_with_a_file 'README.md', %(foo@example.com) do
+      Git::Gsub.run [%(@example), %(bar@example)]
+      expect(File.read('README.md')).to eq %(foobar@example.com)
+    end
   end
 
   it 'should not create backup file' do
