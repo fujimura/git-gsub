@@ -106,7 +106,7 @@ module Git
           from, to, *paths = [from, to, *paths].map { |s| Shellwords.escape s }
           [from, to].each { |s| s.gsub! '@', '\@' }
 
-          target_files = `git grep -l #{from} #{paths.join ' '}`.each_line.map(&:chomp).join ' '
+          target_files = `git grep -l #{from} #{paths.join ' '}`.each_line.map(&:chomp)
           return if target_files.empty?
 
 
