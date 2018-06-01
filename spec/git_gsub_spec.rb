@@ -3,6 +3,11 @@ require 'tmpdir'
 require 'git/gsub'
 require 'pry'
 
+RSpec.configure do |config|
+  config.filter_run :focus => true
+  config.run_all_when_everything_filtered = true
+end
+
 describe 'git-gsub' do
   def run_in_directory_with_a_file(filename, content)
     Dir.mktmpdir do |dir|
