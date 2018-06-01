@@ -39,12 +39,23 @@ describe 'git-gsub' do
       Git::Gsub.run [%(<h1 class="foo">), %(<h1 class="bar">)]
       expect(File.read('README.md')).to eq %(<h1 class="bar">)
     end
+  end
 
-    run_in_directory_with_a_file 'README.md', %(git/gsub) do
-      Git::Gsub.run [%(git/gsub), %(svn/sub)]
-      expect(File.read('README.md')).to eq %(svn/sub)
+  it do
+    run_in_directory_with_a_file 'README.md', %(Hello this is @git) do
+      Git::Gsub.run [%(@git), %(@@svn)]
+      expect(File.read('README.md')).to eq %(Hello this is @@svn)
     end
+  end
 
+  it do
+    run_in_directory_with_a_file 'README.md', %(Hello this is "git") do
+      Git::Gsub.run [%("git"), %('svn')]
+      expect(File.read('README.md')).to eq %(Hello this is 'svn')
+    end
+  end
+
+  it do
     run_in_directory_with_a_file 'README.md', %({git{svn}) do
       Git::Gsub.run [%({git{svn}), %({hg{svn})]
       expect(File.read('README.md')).to eq %({hg{svn})
