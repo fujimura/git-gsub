@@ -56,32 +56,39 @@ describe 'git-gsub' do
     expect(File.read('README.md')).to eq %(<h1 class="bar">)
   end
 
-  it do
+  it 'should substutute @' do
+    commit_file 'README.md', %(foo@example.com)
+    Git::Gsub.run [%(@example), %(bar@example)]
+
+    expect(File.read('README.md')).to eq %(foobar@example.com)
+  end
+
+  it 'should substitute consequenting @' do
     commit_file 'README.md', %(Hello this is @git)
     Git::Gsub.run [%(@git), %(@@svn)]
 
     expect(File.read('README.md')).to eq %(Hello this is @@svn)
   end
 
-  it do
+  it %(should substitute " to ') do
     commit_file 'README.md', %(Hello this is "git")
     Git::Gsub.run [%("git"), %('svn')]
 
     expect(File.read('README.md')).to eq %(Hello this is 'svn')
   end
 
-  it do
+  it %(should substitute ' to ") do
+    commit_file 'README.md', %(Hello this is 'git')
+    Git::Gsub.run [%('git'), %("svn")]
+
+    expect(File.read('README.md')).to eq %(Hello this is "svn")
+  end
+
+  it 'should substitute text including { and }'do
     commit_file 'README.md', %({git{svn})
     Git::Gsub.run [%({git{svn}), %({hg{svn})]
 
     expect(File.read('README.md')).to eq %({hg{svn})
-  end
-
-  it do
-    commit_file 'README.md', %(foo@example.com)
-    Git::Gsub.run [%(@example), %(bar@example)]
-
-    expect(File.read('README.md')).to eq %(foobar@example.com)
   end
 
   it 'should not create backup file' do
