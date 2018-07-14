@@ -16,6 +16,8 @@ Usage: git gsub [options] FROM TO [PATHS]
 
 ## Example
 
+### Normal substutution
+
 To substitute `Git` with `Subversion`:
 
 ```
@@ -47,7 +49,8 @@ index c30f093..03b7c4c 100755
 +Subversion::Gsub.run
 ```
 
-## Experimental features
+### Case-converting substitution
+
 To substitute `CommonLisp` with `VisualBasic` with case-awareness:
 
 ```
@@ -65,6 +68,8 @@ index 2185dbf..393dbc6 100644
 -# CommonLisp common_lisp common-lisp
 +# VisualBasic visual_basic visual-basic
 ```
+
+### Substitute and rename file
 
 Substitute and rename file:
 
