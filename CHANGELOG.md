@@ -1,6 +1,18 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [0.0.9]
+### Fixed
+- Make `--dry-run` works with `--rename`([#10](https://github.com/fujimura/git-gsub/pull/10))
+
+## [0.0.8]
+### Fixed
+- Fix bug on passing file names to `Open3.capture3`[c05a05c](https://github.com/fujimura/git-gsub/commit/c05a05cd413d5a389c781b6649b42a46a825c4db)
+
+## [0.0.7]
+### Fixed
+- Fix escaping @([#8](https://github.com/fujimura/git-gsub/pull/8)) Thanks @amatsuda!
+
 ## [0.0.6]
 ### Added
 - Add option to substitute in camel/kebab/snake case
