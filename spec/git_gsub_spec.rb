@@ -9,12 +9,9 @@ RSpec.configure do |config|
 end
 
 describe 'git-gsub' do
-  def run_in_directory_with_a_file(filename, content)
+  def run_in_tmp_repo
     Dir.mktmpdir do |dir|
       Dir.chdir dir do
-        dirname = File.dirname(filename)
-        FileUtils.mkdir_p(dirname) unless File.exists?(dirname)
-        File.open(filename, 'w') { |f| f << content }
         `git init`
         `git config --local user.email "you@example.com"`
         `git config --local user.name "Your Name"`
@@ -25,81 +22,111 @@ describe 'git-gsub' do
     end
   end
 
-  it 'should substitute files' do
-    run_in_directory_with_a_file 'README.md', 'Git Subversion Bzr' do
-      Git::Gsub.run %w[Bzr Mercurial]
-      expect(File.read('README.md')).to eq 'Git Subversion Mercurial'
+  def commit_file(name, content)
+    FileUtils.mkdir_p(File.dirname(name))
+    File.write(name, content)
+    `git add .`
+    `git commit -m 'Add #{name}'`
+  end
+
+  around do |example|
+    run_in_tmp_repo do
+      example.run
     end
+  end
+
+  it 'should substitute files' do
+    commit_file 'README.md', 'Git Subversion Bzr'
+    Git::Gsub.run %w[Bzr Mercurial]
+
+    expect(File.read('README.md')).to eq 'Git Subversion Mercurial'
   end
 
   it 'should substitute files with case conversion' do
-    run_in_directory_with_a_file 'README.md', 'GitGsub git_gsub git-gsub' do
-      Git::Gsub.run %w[GitGsub SvnGsub --camel --kebab --snake]
-      expect(File.read('README.md')).to eq 'SvnGsub svn_gsub svn-gsub'
-    end
+    commit_file 'README.md', 'GitGsub git_gsub git-gsub'
+    Git::Gsub.run %w[GitGsub SvnGsub --camel --kebab --snake]
+
+    expect(File.read('README.md')).to eq 'SvnGsub svn_gsub svn-gsub'
   end
 
   it 'should escape well' do
-    run_in_directory_with_a_file 'README.md', %(<h1 class="foo">) do
-      Git::Gsub.run [%(<h1 class="foo">), %(<h1 class="bar">)]
-      expect(File.read('README.md')).to eq %(<h1 class="bar">)
-    end
+    commit_file 'README.md', %(<h1 class="foo">)
+    Git::Gsub.run [%(<h1 class="foo">), %(<h1 class="bar">)]
+
+    expect(File.read('README.md')).to eq %(<h1 class="bar">)
   end
 
-  it do
-    run_in_directory_with_a_file 'README.md', %(Hello this is @git) do
-      Git::Gsub.run [%(@git), %(@@svn)]
-      expect(File.read('README.md')).to eq %(Hello this is @@svn)
-    end
+  it 'should substutute @' do
+    commit_file 'README.md', %(foo@example.com)
+    Git::Gsub.run [%(@example), %(bar@example)]
+
+    expect(File.read('README.md')).to eq %(foobar@example.com)
   end
 
-  it do
-    run_in_directory_with_a_file 'README.md', %(Hello this is "git") do
-      Git::Gsub.run [%("git"), %('svn')]
-      expect(File.read('README.md')).to eq %(Hello this is 'svn')
-    end
+  it 'should substitute consequenting @' do
+    commit_file 'README.md', %(Hello this is @git)
+    Git::Gsub.run [%(@git), %(@@svn)]
+
+    expect(File.read('README.md')).to eq %(Hello this is @@svn)
   end
 
-  it do
-    run_in_directory_with_a_file 'README.md', %({git{svn}) do
-      Git::Gsub.run [%({git{svn}), %({hg{svn})]
-      expect(File.read('README.md')).to eq %({hg{svn})
-    end
+  it %(should substitute " to ') do
+    commit_file 'README.md', %(Hello this is "git")
+    Git::Gsub.run [%("git"), %('svn')]
+
+    expect(File.read('README.md')).to eq %(Hello this is 'svn')
   end
 
-  it do
-    run_in_directory_with_a_file 'README.md', %(foo@example.com) do
-      Git::Gsub.run [%(@example), %(bar@example)]
-      expect(File.read('README.md')).to eq %(foobar@example.com)
-    end
+  it %(should substitute ' to ") do
+    commit_file 'README.md', %(Hello this is 'git')
+    Git::Gsub.run [%('git'), %("svn")]
+
+    expect(File.read('README.md')).to eq %(Hello this is "svn")
+  end
+
+  it 'should substitute text including { and }'do
+    commit_file 'README.md', %({git{svn})
+    Git::Gsub.run [%({git{svn}), %({hg{svn})]
+
+    expect(File.read('README.md')).to eq %({hg{svn})
   end
 
   it 'should not create backup file' do
-    run_in_directory_with_a_file 'README.md', 'Git Subversion Bzr' do
-      Git::Gsub.run %w[Bzr Darcs]
-      expect(`ls`).to eql "README.md\n"
-    end
+    commit_file 'README.md', 'Git Subversion Bzr'
+    Git::Gsub.run %w[Bzr Darcs]
+
+    expect(`ls`).to eql "README.md\n"
   end
 
   it 'should rename with --rename' do
-    run_in_directory_with_a_file 'README-git_gsub.md', 'GitGsub git_gsub git-gsub' do
-      Git::Gsub.run %w[GitGsub SvnGsub --snake --rename]
-      expect(`ls`).to eql "README-svn_gsub.md\n"
-      expect(File.read('README-svn_gsub.md')).to eq 'SvnGsub svn_gsub git-gsub'
-    end
+    commit_file 'README-git_gsub.md', 'GitGsub git_gsub git-gsub'
+    Git::Gsub.run %w[GitGsub SvnGsub --snake --rename]
 
-    run_in_directory_with_a_file 'lib/git.rb', 'puts "Git"' do
-      Git::Gsub.run %w[git svn --camel --rename]
-      expect(`ls lib`).to eql "svn.rb\n"
-      expect(File.read('lib/svn.rb')).to eq 'puts "Svn"'
-    end
+    expect(`ls`).to eql "README-svn_gsub.md\n"
+    expect(File.read('README-svn_gsub.md')).to eq 'SvnGsub svn_gsub git-gsub'
+  end
+
+  it 'should rename with --rename' do
+    commit_file 'lib/git.rb', 'puts "Git"'
+    Git::Gsub.run %w[git svn --camel --rename]
+
+    expect(`ls lib`).to eql "svn.rb\n"
+    expect(File.read('lib/svn.rb')).to eq 'puts "Svn"'
   end
 
   it 'should do nothing if no file found' do
-    run_in_directory_with_a_file 'README-git_gsub.md', 'GitGsub git_gsub git-gsub' do
-      expect {
-        Git::Gsub.run %w[Atlanta Chicago --snake --rename]
-      }.not_to raise_error
-    end
+    commit_file 'README-git_gsub.md', 'GitGsub git_gsub git-gsub'
+
+    expect {
+      Git::Gsub.run %w[Atlanta Chicago --snake --rename]
+    }.not_to raise_error
+  end
+
+  it 'should output command with dry-run' do
+    commit_file 'README-git_gsub.md', 'GitGsub git_gsub git-gsub'
+
+    expect {
+      Git::Gsub.run %w[GitGsub SvnGsub --snake --rename --dry-run]
+    }.to output(/Svn/).to_stdout
   end
 end
