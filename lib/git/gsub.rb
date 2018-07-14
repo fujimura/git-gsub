@@ -79,7 +79,7 @@ module Git
 
         def run_commands(commands)
           if options[:dry]
-            commands.each { |args| puts args.join(' ') }
+            commands.each { |args| puts Array(args).join(' ') }
           else
             commands.each { |args| Open3.capture3(*args) }
           end
