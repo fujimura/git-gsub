@@ -91,6 +91,13 @@ describe 'git-gsub' do
     expect(File.read('README.md')).to eq %({hg{svn})
   end
 
+  it 'should substitute text to empty'do
+    commit_file 'README.md', "Git Svn Hg"
+    Git::Gsub.run [%(Svn ), %()]
+
+    expect(File.read('README.md')).to eq %(Git Hg)
+  end
+
   it 'should not create backup file' do
     commit_file 'README.md', 'Git Subversion Bzr'
     Git::Gsub.run %w[Bzr Darcs]
