@@ -103,20 +103,11 @@ module Git
         end
 
         def build_command(from, to, paths = [], _options = {})
-          from, to, *paths = [from, to, *paths].map { |s|
-            if s == ''
-              ''
-            else
-              Shellwords.escape s
-            end
-          }
-          [from, to].each { |s| s.gsub! '@', '\@' }
-
-          target_files = `git grep -l #{from} #{paths.join ' '}`.each_line.map(&:chomp)
+          target_files = `git grep -l #{from.shellescape} #{paths.join ' '}`.each_line.map(&:chomp)
           return if target_files.empty?
 
 
-          ['perl', '-pi', '-e', "s{#{from}}{#{to}}g", *target_files]
+          ['perl', '-i', '-pe', 'BEGIN {$from=shift;$to=shift} s/\Q$from\E/$to/g', from, to, *target_files]
         end
       end
 
