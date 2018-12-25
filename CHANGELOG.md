@@ -1,6 +1,10 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [0.0.10]
+### Changed
+- Support activesupport >= 4 & < 6 ([#12](https://github.com/fujimura/git-gsub/pull/12)) Thanks @hanachin!
+
 ## [0.0.9]
 ### Fixed
 - Make `--dry-run` works with `--rename`([#10](https://github.com/fujimura/git-gsub/pull/10))
