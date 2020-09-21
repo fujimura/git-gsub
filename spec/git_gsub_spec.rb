@@ -29,6 +29,14 @@ describe 'git-gsub' do
     `git commit -m 'Add #{name}'`
   end
 
+  let!(:git_gsub_path) {
+    if ENV['USE_RUBY']
+      File.expand_path("../../bin/git-gsub-ruby", __FILE__)
+    else
+      File.expand_path("../../bin/git-gsub", __FILE__)
+    end
+  }
+
   around do |example|
     run_in_tmp_repo do
       example.run
@@ -37,70 +45,70 @@ describe 'git-gsub' do
 
   it 'should substitute files' do
     commit_file 'README.md', 'Git Subversion Bzr'
-    Git::Gsub.run %w[Bzr Mercurial]
+    `#{git_gsub_path} Bzr Mercurial`
 
     expect(File.read('README.md')).to eq 'Git Subversion Mercurial'
   end
 
   it 'should substitute files with case conversion' do
     commit_file 'README.md', 'GitGsub git_gsub git-gsub'
-    Git::Gsub.run %w[GitGsub SvnGsub --camel --kebab --snake]
+    `#{git_gsub_path} GitGsub SvnGsub --camel --kebab --snake`
 
     expect(File.read('README.md')).to eq 'SvnGsub svn_gsub svn-gsub'
   end
 
   it 'should escape well' do
     commit_file 'README.md', %(<h1 class="foo">)
-    Git::Gsub.run [%(<h1 class="foo">), %(<h1 class="bar">)]
+    `#{git_gsub_path} '<h1 class="foo">' '<h1 class="bar">'`
 
     expect(File.read('README.md')).to eq %(<h1 class="bar">)
   end
 
   it 'should substutute @' do
     commit_file 'README.md', %(foo@example.com)
-    Git::Gsub.run [%(@example), %(bar@example)]
+    `#{git_gsub_path} @example bar@example`
 
     expect(File.read('README.md')).to eq %(foobar@example.com)
   end
 
   it 'should substitute consequenting @' do
     commit_file 'README.md', %(Hello this is @git)
-    Git::Gsub.run [%(@git), %(@@svn)]
+    `#{git_gsub_path} @git @@svn`
 
     expect(File.read('README.md')).to eq %(Hello this is @@svn)
   end
 
   it %(should substitute " to ') do
     commit_file 'README.md', %(Hello this is "git")
-    Git::Gsub.run [%("git"), %('svn')]
+    `#{git_gsub_path} '"git"' "'svn'"`
 
     expect(File.read('README.md')).to eq %(Hello this is 'svn')
   end
 
   it %(should substitute ' to ") do
     commit_file 'README.md', %(Hello this is 'git')
-    Git::Gsub.run [%('git'), %("svn")]
+    `#{git_gsub_path} "'git'" '"svn"'`
 
     expect(File.read('README.md')).to eq %(Hello this is "svn")
   end
 
   it 'should substitute text including { and }'do
     commit_file 'README.md', %({git{svn})
-    Git::Gsub.run [%({git{svn}), %({hg{svn})]
+    `#{git_gsub_path} {git{svn} {hg{svn}}`
 
-    expect(File.read('README.md')).to eq %({hg{svn})
+    expect(File.read('README.md')).to eq %({hg{svn}})
   end
 
   it 'should not create backup file' do
     commit_file 'README.md', 'Git Subversion Bzr'
-    Git::Gsub.run %w[Bzr Darcs]
+    `#{git_gsub_path} Bzr Darcs`
 
     expect(`ls`).to eql "README.md\n"
   end
 
   it 'should rename with --rename' do
     commit_file 'README-git_gsub.md', 'GitGsub git_gsub git-gsub'
-    Git::Gsub.run %w[GitGsub SvnGsub --snake --rename]
+    `#{git_gsub_path} GitGsub SvnGsub --snake --rename`
 
     expect(`ls`).to eql "README-svn_gsub.md\n"
     expect(File.read('README-svn_gsub.md')).to eq 'SvnGsub svn_gsub git-gsub'
@@ -108,7 +116,7 @@ describe 'git-gsub' do
 
   it 'should rename with --rename' do
     commit_file 'lib/git.rb', 'puts "Git"'
-    Git::Gsub.run %w[git svn --camel --rename]
+    `#{git_gsub_path} git svn --camel --rename`
 
     expect(`ls lib`).to eql "svn.rb\n"
     expect(File.read('lib/svn.rb')).to eq 'puts "Svn"'
@@ -118,7 +126,7 @@ describe 'git-gsub' do
     commit_file 'README-git_gsub.md', 'GitGsub git_gsub git-gsub'
 
     expect {
-      Git::Gsub.run %w[Atlanta Chicago --snake --rename]
+      `#{git_gsub_path} Atlanta Chicago --snake --rename`
     }.not_to raise_error
   end
 
