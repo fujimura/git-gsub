@@ -133,12 +133,4 @@ describe 'git-gsub' do
       }.not_to raise_error
     end
   end
-
-  it 'should output command with dry-run' do
-    commit_file 'README-git_gsub.md', 'GitGsub git_gsub git-gsub'
-
-    expect {
-      Git::Gsub.run %w[GitGsub SvnGsub --snake --rename --dry-run]
-    }.to output(/Svn/).to_stdout
-  end
 end
