@@ -53,11 +53,15 @@ describe 'git-gsub' do
 
     it 'should substitute files in specified path' do
       commit_file 'README.md', 'Git Subversion Bzr'
-      commit_file 'lib/git.rb', 'puts "Git"'
-      `#{git_gsub_path} Git Svn lib`
+      commit_file 'foo/git.rb', 'puts "Git"'
+      commit_file 'bar/git.rb', 'puts "Git"'
+      commit_file 'baz/git.rb', 'puts "Git"'
+      `#{git_gsub_path} Git Svn foo baz`
 
       expect(File.read('README.md')).to eq 'Git Subversion Bzr'
-      expect(File.read('lib/git.rb')).to eq 'puts "Svn"'
+      expect(File.read('foo/git.rb')).to eq 'puts "Svn"'
+      expect(File.read('bar/git.rb')).to eq 'puts "Git"'
+      expect(File.read('baz/git.rb')).to eq 'puts "Svn"'
     end
 
     it 'should substitute files with case conversion' do
@@ -135,11 +139,15 @@ describe 'git-gsub' do
 
     it 'should rename with --rename' do
       commit_file 'git.rb', 'puts "Git"'
-      commit_file 'lib/git.rb', 'puts "Git"'
-      `#{git_gsub_path} --rename git svn lib`
+      commit_file 'foo/git.rb', 'puts "Git"'
+      commit_file 'bar/git.rb', 'puts "Git"'
+      commit_file 'baz/git.rb', 'puts "Git"'
+      `#{git_gsub_path} --rename git svn foo baz`
 
-      expect(`ls lib`).to eql "svn.rb\n"
-      expect(`ls .`).to eql "git.rb\nlib\n"
+      expect(`ls foo`).to eql "svn.rb\n"
+      expect(`ls bar`).to eql "git.rb\n"
+      expect(`ls baz`).to eql "svn.rb\n"
+      expect(`ls .`).to eql "bar\nbaz\nfoo\ngit.rb\n"
     end
 
     it 'should do nothing if no file found' do

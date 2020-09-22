@@ -23,14 +23,12 @@ func SubstituteFile(path string, re *regexp.Regexp, to string) {
 	ioutil.WriteFile(string(path), []byte(result), os.ModePerm)
 }
 
-func FindTargetFiles(from string, path string, options ...string) []string {
+func FindTargetFiles(from string, paths []string, options ...string) []string {
 	var args []string
 	args = append(args, "grep", "-l")
 	args = append(args, options...)
 	args = append(args, from)
-	if path != "" {
-		args = append(args, path)
-	}
+	args = append(args, paths...)
 	cmd := exec.Command("git", args...)
 	out, err := cmd.Output()
 	exitCode := cmd.ProcessState.ExitCode()
@@ -41,13 +39,10 @@ func FindTargetFiles(from string, path string, options ...string) []string {
 	return lines
 }
 
-func GetAllFiles(path string) []string {
+func GetAllFiles(paths []string) []string {
 	var args []string
 	args = append(args, "ls-files")
-	if path != "" {
-		args = append(args, path)
-	}
-	log.Println(args)
+	args = append(args, paths...)
 	cmd := exec.Command("git", args...)
 	out, err := cmd.Output()
 	exitCode := cmd.ProcessState.ExitCode()
@@ -92,7 +87,7 @@ func main() {
 
 	flag.Parse()
 	args := flag.Args()
-	if len(args) < 3 {
+	if len(args) < 2 {
 		fmt.Fprintf(os.Stderr, "Usage git gsub [options] FROM TO [PATHS]\n")
 		fmt.Fprintf(os.Stderr, "\nOptions:\n")
 		flag.PrintDefaults()
@@ -100,12 +95,12 @@ func main() {
 	}
 	from := args[0]
 	to := args[1]
-	var targetPath = ""
+	var targetPaths []string
 	if len(args) > 2 {
-		targetPath = args[2]
+		targetPaths = args[2:]
 	}
 
-	files := FindTargetFiles(from, targetPath)
+	files := FindTargetFiles(from, targetPaths)
 	RunSubstitutions(from, to, files)
 
 	snakeFrom := strcase.ToSnake(from)
@@ -116,19 +111,19 @@ func main() {
 	camelTo := strcase.ToCamel(to)
 
 	if *snake {
-		snakePaths := FindTargetFiles(snakeFrom, targetPath)
+		snakePaths := FindTargetFiles(snakeFrom, targetPaths)
 		RunSubstitutions(snakeFrom, snakeTo, snakePaths)
 	}
 	if *kebab {
-		kebabPaths := FindTargetFiles(kebabFrom, targetPath)
+		kebabPaths := FindTargetFiles(kebabFrom, targetPaths)
 		RunSubstitutions(kebabFrom, kebabTo, kebabPaths)
 	}
 	if *camel {
-		camelPaths := FindTargetFiles(camelFrom, targetPath)
+		camelPaths := FindTargetFiles(camelFrom, targetPaths)
 		RunSubstitutions(camelFrom, camelTo, camelPaths)
 	}
 	if *rename {
-		allFiles := GetAllFiles(targetPath)
+		allFiles := GetAllFiles(targetPaths)
 
 		for _, path := range allFiles {
 			RunRenames(from, to, path)
