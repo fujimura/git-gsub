@@ -1,9 +1,9 @@
 on: [push]
 
 jobs:
-  hello_world_job:
+  run_tests:
     runs-on: ubuntu-latest
-    name: A job to say hello
+    name: Run tests
     steps:
       - name: Checkout
         uses: actions/checkout@v2
