@@ -13,6 +13,8 @@ import (
 	"strings"
 )
 
+const Version string = "v0.0.1"
+
 func SubstituteFile(path string, re *regexp.Regexp, to string) {
 	content, err := ioutil.ReadFile(path)
 	if err != nil {
@@ -84,8 +86,15 @@ func main() {
 	var kebab = flag.Bool("kebab", false, "Substitute kebab-cased expressions")
 	var camel = flag.Bool("camel", false, "Substitute camel-cased expressions")
 	var rename = flag.Bool("rename", false, "Rename files with expression")
+	var version = flag.Bool("version", false, "Show version")
 
 	flag.Parse()
+
+	if *version {
+		fmt.Println(Version)
+		os.Exit(0)
+	}
+
 	args := flag.Args()
 	if len(args) < 2 {
 		fmt.Fprintf(os.Stderr, "Usage git gsub [options] FROM TO [PATHS]\n")

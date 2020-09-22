@@ -42,6 +42,14 @@ describe 'git-gsub' do
     end
   end
 
+  describe 'Version' do
+    it 'should show version with --version' do
+      output = `#{git_gsub_path} --version`
+
+      expect(output).to eq "v0.0.1\n"
+    end
+  end
+
   describe 'Substituting' do
     it 'should substitute files' do
       commit_file 'README.md', 'Git Subversion Bzr'
