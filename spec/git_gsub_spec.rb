@@ -1,6 +1,5 @@
 require 'rspec'
 require 'tmpdir'
-require 'git/gsub'
 require 'pry'
 
 RSpec.configure do |config|
