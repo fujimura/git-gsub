@@ -133,6 +133,14 @@ describe 'git-gsub' do
 
       expect(`ls`).to eql "README.md\n"
     end
+
+    it 'should substitute files using submatch' do
+      commit_file 'README.md', 'git-foo-1 git-bar-22 git-baz-3'
+      `#{git_gsub_path} 'git-([a-z]+)-([\\d]{1,2})' '$2-$1'`
+
+      expect(File.read('README.md')).to eq '1-foo 22-bar 3-baz'
+    end
+
   end
 
   describe 'Renaming' do
@@ -163,6 +171,18 @@ describe 'git-gsub' do
       expect {
         `#{git_gsub_path} --snake --rename Atlanta Chicago`
       }.not_to raise_error
+    end
+
+    it 'should rename with --rename using submatch' do
+      commit_file 'git/lib.rb', 'puts "Git"'
+      commit_file 'svn/lib.rb', 'puts "Git"'
+      commit_file 'bzr/lib.rb', 'puts "Git"'
+      `#{git_gsub_path} --rename '(git|svn|bzr)/lib' 'lib/$1'`
+
+      expect(`ls git`).to eql ""
+      expect(`ls svn`).to eql ""
+      expect(`ls bzr`).to eql ""
+      expect(`ls lib`).to eql "bzr.rb\ngit.rb\nsvn.rb\n"
     end
   end
 end

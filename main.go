@@ -27,7 +27,7 @@ func SubstituteFile(path string, re *regexp.Regexp, to string) {
 
 func FindTargetFiles(from string, paths []string, options ...string) []string {
 	var args []string
-	args = append(args, "grep", "-l")
+	args = append(args, "grep", "-l", "--perl-regexp")
 	args = append(args, options...)
 	args = append(args, from)
 	args = append(args, paths...)
