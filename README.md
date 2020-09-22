@@ -1,4 +1,4 @@
-# git-gsub [![Gem Version](https://badge.fury.io/rb/git-gsub.svg)](http://badge.fury.io/rb/git-gsub)[![Build Status](https://travis-ci.org/fujimura/git-gsub.svg)](https://travis-ci.org/fujimura/git-gsub)
+# git-gsub
 
 A Git subcommand to do gsub in a repository
 
@@ -81,39 +81,26 @@ index 2185dbf..393dbc6 100644
 Substitute and rename file:
 
 ```
-$ git gsub --rename --camel ruby haskell
+$ git gsub --rename --camel git svn
 ```
 
 Result:
 
 ```diff
-diff --git a/haskell.hs b/haskell.hs
-new file mode 100644
-index 0000000..ae86ce3
---- /dev/null
-+++ b/haskell.hs
-@@ -0,0 +1 @@
-+putStrLn "Haskell"
-diff --git a/haskell.rb b/haskell.rb
-new file mode 100644
-index 0000000..9f363d3
---- /dev/null
-+++ b/haskell.rb
-@@ -0,0 +1 @@
-+puts "haskell"
-diff --git a/ruby.hs b/ruby.hs
+diff --git a/lib/git.rb b/lib/git.rb
 deleted file mode 100644
-index 70db14d..0000000
---- a/ruby.hs
+index f0b8633..0000000
+--- a/lib/git.rb
 +++ /dev/null
 @@ -1 +0,0 @@
--putStrLn "Ruby"
-diff --git a/ruby.rb b/ruby.rb
-deleted file mode 100644
-index 966eb68..0000000
---- a/ruby.rb
-+++ /dev/null
-@@ -1 +0,0 @@
+-puts "GitGsub"
+diff --git a/lib/svn.rb b/lib/svn.rb
+new file mode 100644
+index 0000000..312f137
+--- /dev/null
++++ b/lib/svn.rb
+@@ -0,0 +1 @@
++puts "SvnGsub"
 ```
 
 ## Installation
