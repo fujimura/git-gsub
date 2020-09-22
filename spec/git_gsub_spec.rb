@@ -51,9 +51,25 @@ describe 'git-gsub' do
       expect(File.read('README.md')).to eq 'Git Subversion Mercurial'
     end
 
+    it 'should substitute files in specified path' do
+      commit_file 'README.md', 'Git Subversion Bzr'
+      commit_file 'lib/git.rb', 'puts "Git"'
+      `#{git_gsub_path} Git Svn lib`
+
+      expect(File.read('README.md')).to eq 'Git Subversion Bzr'
+      expect(File.read('lib/git.rb')).to eq 'puts "Svn"'
+    end
+
     it 'should substitute files with case conversion' do
       commit_file 'README.md', 'GitGsub git_gsub git-gsub'
-      `#{git_gsub_path} GitGsub SvnGsub --camel --kebab --snake`
+      `#{git_gsub_path} --camel --kebab --snake GitGsub SvnGsub`
+
+      expect(File.read('README.md')).to eq 'SvnGsub svn_gsub svn-gsub'
+    end
+
+    it 'should substitute files with case conversion' do
+      commit_file 'README.md', 'GitGsub git_gsub git-gsub'
+      `#{git_gsub_path} --camel --kebab --snake git-gsub svn-gsub`
 
       expect(File.read('README.md')).to eq 'SvnGsub svn_gsub svn-gsub'
     end
@@ -67,9 +83,9 @@ describe 'git-gsub' do
 
     it 'should substutute @' do
       commit_file 'README.md', %(foo@example.com)
-      `#{git_gsub_path} @example bar@example`
+      `#{git_gsub_path} foo@example bar@example`
 
-      expect(File.read('README.md')).to eq %(foobar@example.com)
+      expect(File.read('README.md')).to eq %(bar@example.com)
     end
 
     it 'should substitute consequenting @' do
@@ -111,25 +127,26 @@ describe 'git-gsub' do
   describe 'Renaming' do
     it 'should rename with --rename' do
       commit_file 'README-git_gsub.md', 'GitGsub git_gsub git-gsub'
-      `#{git_gsub_path} GitGsub SvnGsub --snake --rename`
+      `#{git_gsub_path} --snake --rename GitGsub SvnGsub`
 
       expect(`ls`).to eql "README-svn_gsub.md\n"
       expect(File.read('README-svn_gsub.md')).to eq 'SvnGsub svn_gsub git-gsub'
     end
 
     it 'should rename with --rename' do
+      commit_file 'git.rb', 'puts "Git"'
       commit_file 'lib/git.rb', 'puts "Git"'
-      `#{git_gsub_path} git svn --camel --rename`
+      `#{git_gsub_path} --rename git svn lib`
 
       expect(`ls lib`).to eql "svn.rb\n"
-      expect(File.read('lib/svn.rb')).to eq 'puts "Svn"'
+      expect(`ls .`).to eql "git.rb\nlib\n"
     end
 
     it 'should do nothing if no file found' do
       commit_file 'README-git_gsub.md', 'GitGsub git_gsub git-gsub'
 
       expect {
-        `#{git_gsub_path} Atlanta Chicago --snake --rename`
+        `#{git_gsub_path} --snake --rename Atlanta Chicago`
       }.not_to raise_error
     end
   end
