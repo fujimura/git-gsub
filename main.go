@@ -2,6 +2,7 @@ package main
 
 import (
 	"flag"
+	"fmt"
 	"github.com/iancoleman/strcase"
 	"io/ioutil"
 	"log"
@@ -84,13 +85,19 @@ func RunRenames(from string, to string, path string) {
 }
 
 func main() {
-	var snake = flag.Bool("snake", false, "Snake")
-	var kebab = flag.Bool("kebab", false, "Kebab")
-	var camel = flag.Bool("camel", false, "Camel")
-	var rename = flag.Bool("rename", false, "Rename")
+	var snake = flag.Bool("snake", false, "Substitute snake-cased expressions")
+	var kebab = flag.Bool("kebab", false, "Substitute kebab-cased expressions")
+	var camel = flag.Bool("camel", false, "Substitute camel-cased expressions")
+	var rename = flag.Bool("rename", false, "Rename files with expression")
 
 	flag.Parse()
 	args := flag.Args()
+	if len(args) < 3 {
+		fmt.Fprintf(os.Stderr, "Usage git gsub [options] FROM TO [PATHS]\n")
+		fmt.Fprintf(os.Stderr, "\nOptions:\n")
+		flag.PrintDefaults()
+		os.Exit(1)
+	}
 	from := args[0]
 	to := args[1]
 	var targetPath = ""
