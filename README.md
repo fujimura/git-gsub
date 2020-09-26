@@ -5,21 +5,16 @@ A Git subcommand to do gsub in a repository
 ## Usage
 
 ```
+$ git gsub
+Usage git gsub [options] FROM TO [PATHS]
 
 Options:
-  -camel
-        Substitute camel-cased expressions
-  -kebab
-        Substitute kebab-cased expressions
-  -rename
-        Rename files with expression
-  -snake
-        Substitute snake-cased expressions
-  -version
-        Show version
+      --camel     Substitute camel-cased expressions
+      --kebab     Substitute kebab-cased expressions
+      --rename    Rename files with expression
+      --snake     Substitute snake-cased expressions
+      --version   Show version
 ```
-
-(Note that double hyphen before option is also allowed)
 
 ## Example
 
