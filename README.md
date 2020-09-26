@@ -5,14 +5,21 @@ A Git subcommand to do gsub in a repository
 ## Usage
 
 ```
-Usage: git gsub [options] FROM TO [PATHS]
-    -v, --version                    Print version
-        --snake                      Experimental: substitute snake-cased expressions
-        --camel                      Experimental: substitute camel-cased expressions
-        --kebab                      Experimental: substitute kebab-cased expressions
-        --rename                     Rename files along with substitution
-        --dry-run                    Print commands to be run
+
+Options:
+  -camel
+        Substitute camel-cased expressions
+  -kebab
+        Substitute kebab-cased expressions
+  -rename
+        Rename files with expression
+  -snake
+        Substitute snake-cased expressions
+  -version
+        Show version
 ```
+
+(Note that double hyphen before option is also allowed)
 
 ## Example
 
@@ -54,7 +61,7 @@ index c30f093..03b7c4c 100755
 To substitute `CommonLisp` with `VisualBasic` with case-awareness:
 
 ```
-$ git gsub CommonLisp VisualBasic --kebab --snake --camel
+$ git gsub --kebab --snake --camel CommonLisp VisualBasic
 ```
 
 Result:
@@ -74,7 +81,7 @@ index 2185dbf..393dbc6 100644
 Substitute and rename file:
 
 ```
-$ git gsub ruby haskell --rename --camel
+$ git gsub --rename --camel ruby haskell
 ```
 
 Result:
@@ -109,17 +116,11 @@ index 966eb68..0000000
 @@ -1 +0,0 @@
 ```
 
-Caution: Case conversion is done with [ActiveSupport/Inflector](http://api.rubyonrails.org/classes/ActiveSupport/Inflector.html) , which substitutes `::` with `/`. This may cause unexpected result in the language other than Ruby.
-
 ## Installation
 
 ```
-$ gem install git-gsub
+$ go get github.com/fujimura/git-gsub
 ```
-
-## Supported platforms
-
-Maybe on many *nix like OS which has Perl and sed.
 
 ## Contributing
 
