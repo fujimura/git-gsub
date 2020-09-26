@@ -184,5 +184,12 @@ describe 'git-gsub' do
       expect(`ls bzr`).to eql ""
       expect(`ls lib`).to eql "bzr.rb\ngit.rb\nsvn.rb\n"
     end
+
+    it 'should rename a file which has space in filename' do
+      commit_file 'git/l b.rb', 'puts "Git"'
+      `#{git_gsub_path} --rename git svn`
+
+      expect(`ls git`).to eql ""
+    end
   end
 end
