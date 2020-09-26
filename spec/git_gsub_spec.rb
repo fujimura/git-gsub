@@ -85,6 +85,13 @@ describe 'git-gsub' do
       expect(File.read('README.md')).to eq 'SvnGsub svn_gsub svn-gsub'
     end
 
+    it 'options can be put after arguments' do
+      commit_file 'README.md', 'GitGsub git_gsub git-gsub'
+      `#{git_gsub_path} git-gsub svn-gsub --camel --kebab --snake`
+
+      expect(File.read('README.md')).to eq 'SvnGsub svn_gsub svn-gsub'
+    end
+
     it 'should escape well' do
       commit_file 'README.md', %(<h1 class="foo">)
       `#{git_gsub_path} '<h1 class="foo">' '<h1 class="bar">'`

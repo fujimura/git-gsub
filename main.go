@@ -1,9 +1,9 @@
 package main
 
 import (
-	"flag"
 	"fmt"
 	"github.com/iancoleman/strcase"
+	flag "github.com/spf13/pflag"
 	"io/ioutil"
 	"log"
 	"os"
