@@ -1,6 +1,15 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [0.0.12]
+### Added
+- Substitution and renaming can be done with submatch
+### Removed
+- Deprecate `--dry-run` since git-gsub is no longer an one-liner generator
+
+### Internal
+- Rewrite in Go
+
 ## [0.0.11]
 ### Changed
 - Support newer and safer activesupport ([#13](https://github.com/fujimura/git-gsub/pull/13))
