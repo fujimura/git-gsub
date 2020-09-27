@@ -4,6 +4,9 @@ build:
 run:
 	go run main.go
 
+test: build
+	go test -v
+
 compile:
 	# 32-Bit Systems
 	# FreeBDS
@@ -23,6 +26,5 @@ compile:
 	GOOS=linux GOARCH=amd64 go build -o bin/main-linux-amd64 main.go
 	# Windows
 	GOOS=windows GOARCH=amd64 go build -o bin/main-windows-amd64 main.go
-ci:
-	docker build . -t git-gsub-test --file test/Dockerfile
-	docker run git-gsub-test
+
+ci: test
