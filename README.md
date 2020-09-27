@@ -1,17 +1,19 @@
-# git-gsub [![Gem Version](https://badge.fury.io/rb/git-gsub.svg)](http://badge.fury.io/rb/git-gsub)[![Build Status](https://travis-ci.org/fujimura/git-gsub.svg)](https://travis-ci.org/fujimura/git-gsub)
+# git-gsub
 
 A Git subcommand to do gsub in a repository
 
 ## Usage
 
 ```
-Usage: git gsub [options] FROM TO [PATHS]
-    -v, --version                    Print version
-        --snake                      Experimental: substitute snake-cased expressions
-        --camel                      Experimental: substitute camel-cased expressions
-        --kebab                      Experimental: substitute kebab-cased expressions
-        --rename                     Rename files along with substitution
-        --dry-run                    Print commands to be run
+$ git gsub
+Usage git gsub [options] FROM TO [PATHS]
+
+Options:
+      --camel     Substitute camel-cased expressions
+      --kebab     Substitute kebab-cased expressions
+      --rename    Rename files with expression
+      --snake     Substitute snake-cased expressions
+      --version   Show version
 ```
 
 ## Example
@@ -54,7 +56,7 @@ index c30f093..03b7c4c 100755
 To substitute `CommonLisp` with `VisualBasic` with case-awareness:
 
 ```
-$ git gsub CommonLisp VisualBasic --kebab --snake --camel
+$ git gsub --kebab --snake --camel CommonLisp VisualBasic
 ```
 
 Result:
@@ -74,52 +76,33 @@ index 2185dbf..393dbc6 100644
 Substitute and rename file:
 
 ```
-$ git gsub ruby haskell --rename --camel
+$ git gsub --rename --camel git svn
 ```
 
 Result:
 
 ```diff
-diff --git a/haskell.hs b/haskell.hs
-new file mode 100644
-index 0000000..ae86ce3
---- /dev/null
-+++ b/haskell.hs
-@@ -0,0 +1 @@
-+putStrLn "Haskell"
-diff --git a/haskell.rb b/haskell.rb
-new file mode 100644
-index 0000000..9f363d3
---- /dev/null
-+++ b/haskell.rb
-@@ -0,0 +1 @@
-+puts "haskell"
-diff --git a/ruby.hs b/ruby.hs
+diff --git a/lib/git.rb b/lib/git.rb
 deleted file mode 100644
-index 70db14d..0000000
---- a/ruby.hs
+index f0b8633..0000000
+--- a/lib/git.rb
 +++ /dev/null
 @@ -1 +0,0 @@
--putStrLn "Ruby"
-diff --git a/ruby.rb b/ruby.rb
-deleted file mode 100644
-index 966eb68..0000000
---- a/ruby.rb
-+++ /dev/null
-@@ -1 +0,0 @@
+-puts "GitGsub"
+diff --git a/lib/svn.rb b/lib/svn.rb
+new file mode 100644
+index 0000000..312f137
+--- /dev/null
++++ b/lib/svn.rb
+@@ -0,0 +1 @@
++puts "SvnGsub"
 ```
-
-Caution: Case conversion is done with [ActiveSupport/Inflector](http://api.rubyonrails.org/classes/ActiveSupport/Inflector.html) , which substitutes `::` with `/`. This may cause unexpected result in the language other than Ruby.
 
 ## Installation
 
 ```
-$ gem install git-gsub
+$ go get github.com/fujimura/git-gsub
 ```
-
-## Supported platforms
-
-Maybe on many *nix like OS which has Perl and sed.
 
 ## Contributing
 
