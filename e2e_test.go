@@ -228,6 +228,17 @@ func TestSubmatch(t *testing.T) {
 	})
 }
 
+func TestSubstituteToEmptyString(t *testing.T) {
+	RunInTmpRepo(func() {
+		CommitFile("README.md", "Git Svn Hg")
+		RunGitGsub("Svn ", "")
+		dat, _ := ioutil.ReadFile("./README.md")
+		if string(dat) != "Git Hg" {
+			t.Errorf("Failed: %s", string(dat))
+		}
+	})
+}
+
 func TestSimpleRename(t *testing.T) {
 	RunInTmpRepo(func() {
 		CommitFile("README-git_gsub.md", "GitGsub git_gsub git-gsub")
