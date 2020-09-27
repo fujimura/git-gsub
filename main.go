@@ -13,7 +13,7 @@ import (
 	"strings"
 )
 
-const Version string = "v0.0.1"
+const Version string = "v0.0.12"
 
 func SubstituteFile(path string, re *regexp.Regexp, to string) {
 	content, err := ioutil.ReadFile(path)
