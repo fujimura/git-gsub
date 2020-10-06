@@ -2,44 +2,21 @@ package main
 
 import (
 	"fmt"
-	"github.com/iancoleman/strcase"
-	flag "github.com/spf13/pflag"
 	"io/ioutil"
 	"log"
 	"os"
 	"os/exec"
 	"path/filepath"
 	"regexp"
+	"strconv"
 	"strings"
+	"sync"
+
+	"github.com/iancoleman/strcase"
+	flag "github.com/spf13/pflag"
 )
 
 const Version string = "v0.0.12"
-
-func SubstituteFile(path string, re *regexp.Regexp, to string) {
-	content, err := ioutil.ReadFile(path)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	result := re.ReplaceAllString(string(content), to)
-	ioutil.WriteFile(string(path), []byte(result), os.ModePerm)
-}
-
-func FindTargetFiles(from string, paths []string, options ...string) []string {
-	var args []string
-	args = append(args, "grep", "-l", "--perl-regexp")
-	args = append(args, options...)
-	args = append(args, from)
-	args = append(args, paths...)
-	cmd := exec.Command("git", args...)
-	out, err := cmd.Output()
-	exitCode := cmd.ProcessState.ExitCode()
-	if exitCode != 1 && err != nil {
-		log.Fatal(err)
-	}
-	lines := strings.Split(string(out), "\n")
-	return lines
-}
 
 func GetAllFiles(paths []string) []string {
 	var args []string
@@ -55,33 +32,58 @@ func GetAllFiles(paths []string) []string {
 	return lines
 }
 
-func RunSubstitutions(from string, to string, paths []string) {
-	for _, path := range paths {
-		if path == "" {
-			continue
-		}
-		re, err := regexp.Compile(from)
-		if err != nil {
-			log.Fatal(err)
-		}
-		SubstituteFile(path, re, to)
-	}
+type Substitution struct {
+	re regexp.Regexp
+	to string
 }
 
-func RunRenames(from string, to string, path string) {
-	re, err := regexp.Compile(from)
+func runSubstitionsAndRenames(substitutions []Substitution, rename bool, path string) {
+	if path == "" {
+		return
+	}
+
+	info, err := os.Stat(path)
+
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	newpath := re.ReplaceAllString(path, to)
-	if newpath != path {
-		os.MkdirAll(filepath.Dir(newpath), os.ModePerm)
-		os.Rename(path, newpath)
+	if info.IsDir() {
+		return
+	}
+
+	content, err := ioutil.ReadFile(path)
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	replaced := false
+
+	for _, s := range substitutions {
+		if s.re.Match(content) {
+			replaced = true
+			content = s.re.ReplaceAll(content, []byte(s.to))
+		}
+	}
+
+	if replaced {
+		ioutil.WriteFile(path, content, os.ModePerm)
+	}
+
+	if rename {
+		for _, s := range substitutions {
+			newpath := s.re.ReplaceAllString(path, s.to)
+			if newpath != path {
+				os.MkdirAll(filepath.Dir(newpath), os.ModePerm)
+				os.Rename(path, newpath)
+			}
+		}
 	}
 }
 
 func main() {
+
 	var snake = flag.Bool("snake", false, "Substitute snake-cased expressions")
 	var kebab = flag.Bool("kebab", false, "Substitute kebab-cased expressions")
 	var camel = flag.Bool("camel", false, "Substitute camel-cased expressions")
@@ -102,49 +104,64 @@ func main() {
 		flag.PrintDefaults()
 		os.Exit(1)
 	}
-	from := args[0]
+	rawFrom := args[0]
 	to := args[1]
 	var targetPaths []string
 	if len(args) > 2 {
 		targetPaths = args[2:]
 	}
 
-	files := FindTargetFiles(from, targetPaths)
-	RunSubstitutions(from, to, files)
+	var substitutions []Substitution
 
-	snakeFrom := strcase.ToSnake(from)
-	snakeTo := strcase.ToSnake(to)
-	kebabFrom := strcase.ToKebab(from)
-	kebabTo := strcase.ToKebab(to)
-	camelFrom := strcase.ToCamel(from)
-	camelTo := strcase.ToCamel(to)
+	from := regexp.MustCompile(rawFrom)
+	substitutions = append(substitutions, Substitution{*from, to})
 
 	if *snake {
-		snakePaths := FindTargetFiles(snakeFrom, targetPaths)
-		RunSubstitutions(snakeFrom, snakeTo, snakePaths)
+		snakeFrom := regexp.MustCompile(strcase.ToSnake(rawFrom))
+		snakeTo := strcase.ToSnake(to)
+		substitutions = append(substitutions, Substitution{*snakeFrom, snakeTo})
 	}
 	if *kebab {
-		kebabPaths := FindTargetFiles(kebabFrom, targetPaths)
-		RunSubstitutions(kebabFrom, kebabTo, kebabPaths)
+		kebabFrom := regexp.MustCompile(strcase.ToKebab(rawFrom))
+		kebabTo := strcase.ToKebab(to)
+		substitutions = append(substitutions, Substitution{*kebabFrom, kebabTo})
 	}
 	if *camel {
-		camelPaths := FindTargetFiles(camelFrom, targetPaths)
-		RunSubstitutions(camelFrom, camelTo, camelPaths)
+		camelFrom := regexp.MustCompile(strcase.ToCamel(rawFrom))
+		camelTo := strcase.ToCamel(to)
+		substitutions = append(substitutions, Substitution{*camelFrom, camelTo})
 	}
-	if *rename {
-		allFiles := GetAllFiles(targetPaths)
 
-		for _, path := range allFiles {
-			RunRenames(from, to, path)
-			if *snake {
-				RunRenames(snakeFrom, snakeTo, path)
-			}
-			if *kebab {
-				RunRenames(kebabFrom, kebabTo, path)
-			}
-			if *camel {
-				RunRenames(camelFrom, camelTo, path)
-			}
-		}
+	files := GetAllFiles(targetPaths)
+
+	c := make(chan bool, getMaxProcs())
+	var wg sync.WaitGroup
+
+	for _, path := range files {
+		wg.Add(1)
+		go func(path_ string) {
+			c <- true
+			runSubstitionsAndRenames(substitutions, *rename, path_)
+			<-c
+			wg.Done()
+		}(path)
 	}
+	wg.Wait()
+}
+
+func getMaxProcs() int {
+	var maxProcs int
+
+	mp := os.Getenv("GIT_GSUB_MAX_PROCS")
+	if mp == "" {
+		maxProcs = 100
+	} else {
+		i, err := strconv.Atoi(mp)
+		if err != nil {
+			log.Fatal(err)
+		}
+		maxProcs = i
+	}
+
+	return maxProcs
 }
