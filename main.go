@@ -18,7 +18,12 @@ import (
 
 const Version string = "v0.0.12"
 
-func GetAllFiles(paths []string) []string {
+type Substitution struct {
+	re regexp.Regexp
+	to string
+}
+
+func getAllFiles(paths []string) []string {
 	var args []string
 	args = append(args, "ls-files")
 	args = append(args, paths...)
@@ -30,11 +35,6 @@ func GetAllFiles(paths []string) []string {
 	}
 	lines := strings.Split(string(out), "\n")
 	return lines
-}
-
-type Substitution struct {
-	re regexp.Regexp
-	to string
 }
 
 func runSubstitionsAndRenames(substitutions []Substitution, rename bool, path string) {
@@ -82,8 +82,24 @@ func runSubstitionsAndRenames(substitutions []Substitution, rename bool, path st
 	}
 }
 
-func main() {
+func getMaxProcs() int {
+	var maxProcs int
 
+	mp := os.Getenv("GIT_GSUB_MAX_PROCS")
+	if mp == "" {
+		maxProcs = 100
+	} else {
+		i, err := strconv.Atoi(mp)
+		if err != nil {
+			log.Fatal(err)
+		}
+		maxProcs = i
+	}
+
+	return maxProcs
+}
+
+func main() {
 	var snake = flag.Bool("snake", false, "Substitute snake-cased expressions")
 	var kebab = flag.Bool("kebab", false, "Substitute kebab-cased expressions")
 	var camel = flag.Bool("camel", false, "Substitute camel-cased expressions")
@@ -132,7 +148,7 @@ func main() {
 		substitutions = append(substitutions, Substitution{*camelFrom, camelTo})
 	}
 
-	files := GetAllFiles(targetPaths)
+	files := getAllFiles(targetPaths)
 
 	c := make(chan bool, getMaxProcs())
 	var wg sync.WaitGroup
@@ -147,21 +163,4 @@ func main() {
 		}(path)
 	}
 	wg.Wait()
-}
-
-func getMaxProcs() int {
-	var maxProcs int
-
-	mp := os.Getenv("GIT_GSUB_MAX_PROCS")
-	if mp == "" {
-		maxProcs = 100
-	} else {
-		i, err := strconv.Atoi(mp)
-		if err != nil {
-			log.Fatal(err)
-		}
-		maxProcs = i
-	}
-
-	return maxProcs
 }
