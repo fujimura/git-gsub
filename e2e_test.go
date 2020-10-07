@@ -85,6 +85,7 @@ func GitGsubPath() string {
 func RunGitGsub(args ...string) ([]byte, error) {
 	out, err := exec.Command(GitGsubPath(), args...).Output()
 	if err != nil {
+		fmt.Println(string(out))
 		panic(err)
 	}
 	return out, err
@@ -103,6 +104,23 @@ func TestSimpleSubstitution(t *testing.T) {
 		RunGitGsub("Bzr", "Mercurial")
 
 		dat, _ := ioutil.ReadFile("./README.md")
+		if string(dat) != "Git Subversion Mercurial" {
+			t.Errorf("Failed: %s", string(dat))
+		}
+	})
+}
+
+func TestSimpleSubstitutionManyFiles(t *testing.T) {
+	RunInTmpRepo(func() {
+		CommitFile("README_1.md", "Git Subversion Bzr")
+		CommitFile("README_2.md", "Git Subversion Bzr")
+		CommitFile("README_3.md", "Git Subversion Bzr")
+		CommitFile("README_4.md", "Git Subversion Bzr")
+		CommitFile("README_5.md", "Git Subversion Bzr")
+		CommitFile("README_6.md", "Git Subversion Bzr")
+		RunGitGsub("Bzr", "Mercurial")
+
+		dat, _ := ioutil.ReadFile("./README_1.md")
 		if string(dat) != "Git Subversion Mercurial" {
 			t.Errorf("Failed: %s", string(dat))
 		}
