@@ -9,11 +9,12 @@ $ git gsub
 Usage git gsub [options] FROM TO [PATHS]
 
 Options:
-      --camel     Substitute camel-cased expressions
-      --kebab     Substitute kebab-cased expressions
-      --rename    Rename files with expression
-      --snake     Substitute snake-cased expressions
-      --version   Show version
+      --camel       Substitute camel-cased expressions
+      --kebab       Substitute kebab-cased expressions
+      --rename      Rename files with expression
+      --snake       Substitute snake-cased expressions
+      -F, --fgrep   Interpret given pattern as a fixed string
+      --version     Show version
 ```
 
 ## Example

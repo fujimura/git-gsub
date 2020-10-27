@@ -104,6 +104,7 @@ func main() {
 	var kebab = flag.Bool("kebab", false, "Substitute kebab-cased expressions")
 	var camel = flag.Bool("camel", false, "Substitute camel-cased expressions")
 	var rename = flag.Bool("rename", false, "Rename files with expression")
+	var fgrep = flag.BoolP("fgrep", "F", false, "Interpret given pattern as a fixed string")
 	var version = flag.Bool("version", false, "Show version")
 
 	flag.Parse()
@@ -120,8 +121,13 @@ func main() {
 		flag.PrintDefaults()
 		os.Exit(1)
 	}
+
 	rawFrom := args[0]
+	if *fgrep {
+		rawFrom = regexp.QuoteMeta(rawFrom)
+	}
 	to := args[1]
+
 	var targetPaths []string
 	if len(args) > 2 {
 		targetPaths = args[2:]

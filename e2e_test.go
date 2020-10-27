@@ -169,6 +169,18 @@ func TestOptionsCanBePutAfterArguments(t *testing.T) {
 	})
 }
 
+func TestSubstitutionWithFixedStringOption(t *testing.T) {
+	RunInTmpRepo(func() {
+		CommitFile("hello.rb", "puts('hello')")
+		RunGitGsub("--fgrep", "(", " ")
+		RunGitGsub("-F", ")", "")
+		dat, _ := ioutil.ReadFile("./hello.rb")
+		if string(dat) != "puts 'hello'" {
+			t.Errorf("Failed: %s", string(dat))
+		}
+	})
+}
+
 func TestEscape(t *testing.T) {
 	RunInTmpRepo(func() {
 		CommitFile("README.md", `<h1 class="foo">`)
