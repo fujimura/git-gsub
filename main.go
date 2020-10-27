@@ -26,6 +26,7 @@ type Substitution struct {
 func getAllFiles(paths []string) []string {
 	var args []string
 	args = append(args, "ls-files")
+	args = append(args, "-z")
 	args = append(args, paths...)
 	cmd := exec.Command("git", args...)
 	out, err := cmd.Output()
@@ -33,7 +34,7 @@ func getAllFiles(paths []string) []string {
 	if exitCode != 1 && err != nil {
 		log.Fatal(err)
 	}
-	lines := strings.Split(string(out), "\n")
+	lines := strings.Split(string(out), "\x00")
 	return lines
 }
 
