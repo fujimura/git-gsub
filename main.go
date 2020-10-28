@@ -16,7 +16,7 @@ import (
 	flag "github.com/spf13/pflag"
 )
 
-const Version string = "v0.0.13"
+const Version string = "v0.0.14"
 
 type Substitution struct {
 	re regexp.Regexp

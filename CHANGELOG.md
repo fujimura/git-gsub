@@ -1,6 +1,16 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [0.0.14]
+
+### Added
+
+- Add -F option for "fixed string" (a.k.a. fgrep) search ([#13](https://github.com/fujimura/git-gsub/pull/13)) Thanks @amatsuda!
+
+### Fixed
+
+- Handle multiplyte filenames properly ([#16](https://github.com/fujimura/git-gsub/pull/16)) Thanks @amatsuda!
+
 ## [0.0.13]
 
 - Internal changes only
