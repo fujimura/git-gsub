@@ -257,6 +257,17 @@ func TestSubstituteToEmptyString(t *testing.T) {
 	})
 }
 
+func TestUTF8Filename(t *testing.T) {
+	RunInTmpRepo(func() {
+		CommitFile("よんでね.txt", "よんでね")
+		RunGitGsub("でね", "だよ")
+		dat, _ := ioutil.ReadFile("./よんでね.txt")
+		if string(dat) != "よんだよ" {
+			t.Errorf("Failed: %s", string(dat))
+		}
+	})
+}
+
 func TestSimpleRename(t *testing.T) {
 	RunInTmpRepo(func() {
 		CommitFile("README-git_gsub.md", "GitGsub git_gsub git-gsub")
