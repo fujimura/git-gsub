@@ -1,6 +1,10 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [0.0.13]
+
+- Internal changes only
+
 ## [0.0.12]
 ### Added
 - Substitution and renaming can be done with submatch
