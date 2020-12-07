@@ -23,7 +23,7 @@ type Substitution struct {
 	to string
 }
 
-func getAllFiles(paths []string) []string {
+func getAllFiles(paths []string) ([]string, error) {
 	var args []string
 	args = append(args, "ls-files")
 	args = append(args, "-z")
@@ -32,10 +32,10 @@ func getAllFiles(paths []string) []string {
 	out, err := cmd.Output()
 	exitCode := cmd.ProcessState.ExitCode()
 	if exitCode != 1 && err != nil {
-		log.Fatal(err)
+		return []string{}, err
 	}
 	lines := strings.Split(string(out), "\x00")
-	return lines
+	return lines, nil
 }
 
 func runSubstitionsAndRenames(substitutions []Substitution, rename bool, path string) {
@@ -100,7 +100,9 @@ func getMaxProcs() int {
 	return maxProcs
 }
 
-func main() {
+func run(_args []string) (int, error) {
+	flag.CommandLine = flag.NewFlagSet(os.Args[0], flag.ExitOnError)
+
 	var snake = flag.Bool("snake", false, "Substitute snake-cased expressions")
 	var kebab = flag.Bool("kebab", false, "Substitute kebab-cased expressions")
 	var camel = flag.Bool("camel", false, "Substitute camel-cased expressions")
@@ -108,19 +110,19 @@ func main() {
 	var fgrep = flag.BoolP("fgrep", "F", false, "Interpret given pattern as a fixed string")
 	var version = flag.Bool("version", false, "Show version")
 
-	flag.Parse()
+	flag.CommandLine.Parse(_args)
+	args := flag.Args()
 
 	if *version {
 		fmt.Println(Version)
-		os.Exit(0)
+		return 0, nil
 	}
 
-	args := flag.Args()
 	if len(args) < 2 {
 		fmt.Fprintf(os.Stderr, "Usage git gsub [options] FROM TO [PATHS]\n")
 		fmt.Fprintf(os.Stderr, "\nOptions:\n")
 		flag.PrintDefaults()
-		os.Exit(1)
+		return 1, nil
 	}
 
 	rawFrom := args[0]
@@ -155,7 +157,11 @@ func main() {
 		substitutions = append(substitutions, Substitution{*camelFrom, camelTo})
 	}
 
-	files := getAllFiles(targetPaths)
+	files, err := getAllFiles(targetPaths)
+	if err != nil {
+		return 1, err
+
+	}
 
 	c := make(chan bool, getMaxProcs())
 	var wg sync.WaitGroup
@@ -170,4 +176,14 @@ func main() {
 		}(path)
 	}
 	wg.Wait()
+
+	return 0, nil
+}
+
+func main() {
+	exitcode, err := run(os.Args[1:])
+	if err != nil {
+		log.Fatal(err)
+	}
+	os.Exit(exitcode)
 }

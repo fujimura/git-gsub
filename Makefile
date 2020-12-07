@@ -4,8 +4,11 @@ build:
 run:
 	go run main.go
 
-test: build
+test:
 	go test -v
+
+e2e: build
+	E2E=1 go test -v
 
 compile:
 	# 32-Bit Systems
@@ -27,4 +30,4 @@ compile:
 	# Windows
 	GOOS=windows GOARCH=amd64 go build -o bin/main-windows-amd64 main.go
 
-ci: test
+ci: test e2e

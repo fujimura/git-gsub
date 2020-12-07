@@ -83,16 +83,32 @@ func GitGsubPath() string {
 }
 
 func RunGitGsub(args ...string) ([]byte, error) {
-	out, err := exec.Command(GitGsubPath(), args...).Output()
-	if err != nil {
-		fmt.Println(string(out))
-		panic(err)
+	var out []byte
+	var err error
+
+	_, e2e := os.LookupEnv("E2E")
+
+	if e2e {
+		out, err = exec.Command(GitGsubPath(), args...).Output()
+		if err != nil {
+			fmt.Println(string(out))
+			panic(err)
+		}
+	} else {
+		_, err = run(args)
 	}
 	return out, err
 }
 
 func TestVersion(t *testing.T) {
+	_, e2e := os.LookupEnv("E2E")
+
+	if !e2e {
+		t.Skip()
+	}
+
 	out, _ := RunGitGsub("--version")
+
 	if string(out) != "v0.0.14\n" {
 		t.Errorf("Failed: %s", string(out))
 	}
