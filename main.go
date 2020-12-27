@@ -19,9 +19,11 @@ import (
 const Version string = "v0.0.14"
 
 type Substitution struct {
-	re regexp.Regexp
+	re *regexp.Regexp
 	to string
 }
+
+type Substitutions = map[string]Substitution
 
 func getAllFiles(paths []string) ([]string, error) {
 	var args []string
@@ -38,7 +40,7 @@ func getAllFiles(paths []string) ([]string, error) {
 	return lines, nil
 }
 
-func runSubstitionsAndRenames(substitutions []Substitution, rename bool, path string) {
+func runSubstitionsAndRenames(substitutions Substitutions, rename bool, path string) {
 	if path == "" {
 		return
 	}
@@ -61,10 +63,10 @@ func runSubstitionsAndRenames(substitutions []Substitution, rename bool, path st
 
 	replaced := false
 
-	for _, s := range substitutions {
-		if s.re.Match(content) {
+	for _, sub := range substitutions {
+		if sub.re.Match(content) {
 			replaced = true
-			content = s.re.ReplaceAll(content, []byte(s.to))
+			content = sub.re.ReplaceAll(content, []byte(sub.to))
 		}
 	}
 
@@ -73,8 +75,9 @@ func runSubstitionsAndRenames(substitutions []Substitution, rename bool, path st
 	}
 
 	if rename {
-		for _, s := range substitutions {
-			newpath := s.re.ReplaceAllString(path, s.to)
+		for _, sub := range substitutions {
+			// TODO PERF
+			newpath := sub.re.ReplaceAllString(path, sub.to)
 			if newpath != path {
 				os.MkdirAll(filepath.Dir(newpath), os.ModePerm)
 				os.Rename(path, newpath)
@@ -136,25 +139,21 @@ func run(_args []string) (int, error) {
 		targetPaths = args[2:]
 	}
 
-	var substitutions []Substitution
+	substitutions := map[string]Substitution{}
 
-	from := regexp.MustCompile(rawFrom)
-	substitutions = append(substitutions, Substitution{*from, to})
+	substitutions[rawFrom] = Substitution{regexp.MustCompile(rawFrom), to}
 
 	if *snake {
-		snakeFrom := regexp.MustCompile(strcase.ToSnake(rawFrom))
-		snakeTo := strcase.ToSnake(to)
-		substitutions = append(substitutions, Substitution{*snakeFrom, snakeTo})
+		snakeFrom := strcase.ToSnake(rawFrom)
+		substitutions[snakeFrom] = Substitution{regexp.MustCompile(snakeFrom), strcase.ToSnake(to)}
 	}
 	if *kebab {
-		kebabFrom := regexp.MustCompile(strcase.ToKebab(rawFrom))
-		kebabTo := strcase.ToKebab(to)
-		substitutions = append(substitutions, Substitution{*kebabFrom, kebabTo})
+		kebabFrom := strcase.ToKebab(rawFrom)
+		substitutions[kebabFrom] = Substitution{regexp.MustCompile(kebabFrom), strcase.ToKebab(to)}
 	}
 	if *camel {
-		camelFrom := regexp.MustCompile(strcase.ToCamel(rawFrom))
-		camelTo := strcase.ToCamel(to)
-		substitutions = append(substitutions, Substitution{*camelFrom, camelTo})
+		camelFrom := strcase.ToCamel(rawFrom)
+		substitutions[camelFrom] = Substitution{regexp.MustCompile(camelFrom), strcase.ToCamel(to)}
 	}
 
 	files, err := getAllFiles(targetPaths)
