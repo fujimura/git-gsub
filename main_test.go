@@ -174,6 +174,18 @@ func TestSubstitutionWithCaseConversion(t *testing.T) {
 	})
 }
 
+func TestSubstitutionOfAllUnderscoredPhraseWithCaseConversion(t *testing.T) {
+	RunInTmpRepo(func() {
+		CommitFile("README.md", "activerecord")
+		RunGitGsub("activerecord", "inactiverecord", "--kebab", "--snake", "--camel")
+
+		dat, _ := ioutil.ReadFile("./README.md")
+		if string(dat) != "inactiverecord" {
+			t.Errorf("Failed: %s", string(dat))
+		}
+	})
+}
+
 func TestOptionsCanBePutAfterArguments(t *testing.T) {
 	RunInTmpRepo(func() {
 		CommitFile("README.md", "GitGsub git_gsub git-gsub")
