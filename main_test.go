@@ -109,7 +109,7 @@ func TestVersion(t *testing.T) {
 
 	out, _ := RunGitGsub("--version")
 
-	if string(out) != "v0.0.14\n" {
+	if string(out) != "v0.0.15\n" {
 		t.Errorf("Failed: %s", string(out))
 	}
 }
