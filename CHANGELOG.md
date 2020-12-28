@@ -9,7 +9,7 @@ All notable changes to this project will be documented in this file.
 
 ### Fixed
 
-- Handle multiplyte filenames properly ([#16](https://github.com/fujimura/git-gsub/pull/16)) Thanks @amatsuda!
+- Handle multibyte filenames properly ([#16](https://github.com/fujimura/git-gsub/pull/16)) Thanks @amatsuda!
 
 ## [0.0.13]
 
