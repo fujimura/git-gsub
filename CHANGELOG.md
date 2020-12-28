@@ -1,6 +1,12 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [0.0.15]
+
+### Fixed
+
+Fix substitution of underscore-only phrase with case conversion [#19](https://github.com/fujimura/git-gsub/pull/19)
+
 ## [0.0.14]
 
 ### Added
