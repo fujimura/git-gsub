@@ -95,7 +95,11 @@ func RunGitGsub(args ...string) ([]byte, error) {
 			panic(err)
 		}
 	} else {
-		_, err = run(args)
+		cli := &CLI{outStream: os.Stdout, errStream: os.Stderr}
+		exitcode := cli.Run(args)
+		if exitcode != 0 {
+			panic("Non-zero exit code")
+		}
 	}
 	return out, err
 }
