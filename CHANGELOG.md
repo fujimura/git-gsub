@@ -1,6 +1,13 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [0.1.0]
+
+### Added
+
+- Added `--all` or `-a` option which does camel, kebab and snake substitutions
+- Added `--ruby` option which replaces `Foo::Bar` along with `foo/bar`
+
 ## [0.0.15]
 
 ### Fixed
