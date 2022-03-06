@@ -112,7 +112,7 @@ func TestVersion(t *testing.T) {
 		t.Errorf("Command failed: %s", err)
 	}
 
-	if string(out) != "v0.1.0\n" {
+	if string(out) != "v0.1.1\n" {
 		t.Errorf("Failed: %s", string(out))
 	}
 }
