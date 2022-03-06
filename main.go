@@ -129,10 +129,10 @@ func (cli *CLI) Run(_args []string) int {
 	var kebab = flag.Bool("kebab", false, "Substitute kebab-cased expressions")
 	var camel = flag.Bool("camel", false, "Substitute camel-cased expressions")
 	var ruby = flag.Bool("ruby", false, "Substitute Ruby module and directory expressions")
-	var all = flag.Bool("all", false, "Substitute snake, kebab, camel and Ruby expressions")
-	var rename = flag.Bool("rename", false, "Rename files with expression")
+	var all = flag.BoolP("all", "a", false, "Substitute snake, kebab, camel and Ruby expressions")
+	var rename = flag.BoolP("rename", "r", false, "Rename files with expression")
 	var fgrep = flag.BoolP("fgrep", "F", false, "Interpret given pattern as a fixed string")
-	var version = flag.Bool("version", false, "Show version")
+	var version = flag.BoolP("version", "v", false, "Show version")
 
 	flag.CommandLine.Parse(_args)
 	flag.CommandLine.SetOutput(cli.errStream)
