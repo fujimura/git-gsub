@@ -417,21 +417,7 @@ func TestRuby(t *testing.T) {
 		}
 	})
 }
-
 func TestAll(t *testing.T) {
-	RunInTmpRepo(func() {
-		CommitFile("./foo_bar/baz.rb", "module FooBar::Baz; foo_bar baz # foo_bar/baz; end")
-		_, err := RunGitGsub("--all", "--rename", "FooBar::Baz", "QuxQuux::Quuz")
-		if err != nil {
-			t.Errorf("Command failed: %s", err)
-		}
-
-		dat, _ := ioutil.ReadFile("./qux_quux/quuz.rb")
-		if string(dat) != "module QuxQuux::Quuz; foo_bar baz # qux_quux/quuz; end" {
-			t.Errorf("Failed: %s", string(dat))
-		}
-	})
-
 	RunInTmpRepo(func() {
 		CommitFile("./foo_bar.rb", "module FooBar; foo_bar foo-bar; end")
 		_, err := RunGitGsub("--all", "--rename", "FooBar", "BazQux")
@@ -441,6 +427,36 @@ func TestAll(t *testing.T) {
 
 		dat, _ := ioutil.ReadFile("./baz_qux.rb")
 		if string(dat) != "module BazQux; baz_qux baz-qux; end" {
+			t.Errorf("Failed: %s", string(dat))
+		}
+	})
+}
+
+func TestAllDoesntImplyRuby(t *testing.T) {
+	RunInTmpRepo(func() {
+		CommitFile("./foo_bar/baz.rb", "module FooBar::Baz; foo_bar baz # foo_bar/baz; end")
+		_, err := RunGitGsub("--all", "--rename", "FooBar::Baz", "QuxQuux::Quuz")
+		if err != nil {
+			t.Errorf("Command failed: %s", err)
+		}
+
+		dat, _ := ioutil.ReadFile("./foo_bar/baz.rb")
+		if string(dat) != "module QuxQuux::Quuz; foo_bar baz # foo_bar/baz; end" {
+			t.Errorf("Failed: %s", string(dat))
+		}
+	})
+}
+
+func TestAllPlusRuby(t *testing.T) {
+	RunInTmpRepo(func() {
+		CommitFile("./foo_bar/baz.rb", "module FooBar::Baz; foo_bar baz # foo_bar/baz; end")
+		_, err := RunGitGsub("--all", "--ruby", "--rename", "FooBar::Baz", "QuxQuux::Quuz")
+		if err != nil {
+			t.Errorf("Command failed: %s", err)
+		}
+
+		dat, _ := ioutil.ReadFile("./qux_quux/quuz.rb")
+		if string(dat) != "module QuxQuux::Quuz; foo_bar baz # qux_quux/quuz; end" {
 			t.Errorf("Failed: %s", string(dat))
 		}
 	})

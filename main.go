@@ -128,8 +128,8 @@ func (cli *CLI) Run(_args []string) int {
 	var snake = flag.Bool("snake", false, "Substitute snake-cased expressions")
 	var kebab = flag.Bool("kebab", false, "Substitute kebab-cased expressions")
 	var camel = flag.Bool("camel", false, "Substitute camel-cased expressions")
+	var all = flag.BoolP("all", "a", false, "Substitute (snake|kebab|camel)-cased expressions")
 	var ruby = flag.Bool("ruby", false, "Substitute Ruby module and directory expressions")
-	var all = flag.BoolP("all", "a", false, "Substitute snake, kebab, camel and Ruby expressions")
 	var rename = flag.BoolP("rename", "r", false, "Rename files with expression")
 	var fgrep = flag.BoolP("fgrep", "F", false, "Interpret given pattern as a fixed string")
 	var version = flag.BoolP("version", "v", false, "Show version")
@@ -175,7 +175,7 @@ func (cli *CLI) Run(_args []string) int {
 		addSub(&substitutions, rawFrom, to, strcase.ToCamel)
 	}
 
-	if *ruby || *all {
+	if *ruby {
 		addSub(&substitutions, rawFrom, to, ToRubyDirectory)
 		addSub(&substitutions, rawFrom, to, ToRubyModule)
 	}
