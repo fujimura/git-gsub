@@ -106,18 +106,13 @@ func RunGitGsub(args ...string) ([]byte, error) {
 }
 
 func TestVersion(t *testing.T) {
-	_, e2e := os.LookupEnv("E2E")
-
-	if !e2e {
-		t.Skip()
-	}
-
 	out, err := RunGitGsub("--version")
+
 	if err != nil {
 		t.Errorf("Command failed: %s", err)
 	}
 
-	if string(out) != "v0.0.15\n" {
+	if string(out) != "v0.0.15" {
 		t.Errorf("Failed: %s", string(out))
 	}
 }
