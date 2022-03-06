@@ -1,6 +1,8 @@
 package main
 
 import (
+	"bytes"
+	"errors"
 	"fmt"
 	"io/ioutil"
 	"log"
@@ -90,16 +92,15 @@ func RunGitGsub(args ...string) ([]byte, error) {
 
 	if e2e {
 		out, err = exec.Command(GitGsubPath(), args...).Output()
-		if err != nil {
-			fmt.Println(string(out))
-			panic(err)
-		}
 	} else {
-		cli := &CLI{outStream: os.Stdout, errStream: os.Stderr}
+		outStream, errStream := new(bytes.Buffer), new(bytes.Buffer)
+
+		cli := &CLI{outStream: outStream, errStream: errStream}
 		exitcode := cli.Run(args)
 		if exitcode != 0 {
-			panic("Non-zero exit code")
+			err = errors.New(errStream.String())
 		}
+		out = outStream.Bytes()
 	}
 	return out, err
 }
@@ -111,7 +112,10 @@ func TestVersion(t *testing.T) {
 		t.Skip()
 	}
 
-	out, _ := RunGitGsub("--version")
+	out, err := RunGitGsub("--version")
+	if err != nil {
+		t.Errorf("Command failed: %s", err)
+	}
 
 	if string(out) != "v0.0.15\n" {
 		t.Errorf("Failed: %s", string(out))
@@ -121,7 +125,11 @@ func TestVersion(t *testing.T) {
 func TestSimpleSubstitution(t *testing.T) {
 	RunInTmpRepo(func() {
 		CommitFile("README.md", "Git Subversion Bzr")
-		RunGitGsub("Bzr", "Mercurial")
+		_, err := RunGitGsub("Bzr", "Mercurial")
+
+		if err != nil {
+			t.Errorf("Command failed: %s", err)
+		}
 
 		dat, _ := ioutil.ReadFile("./README.md")
 		if string(dat) != "Git Subversion Mercurial" {
@@ -138,7 +146,11 @@ func TestSimpleSubstitutionManyFiles(t *testing.T) {
 		CommitFile("README_4.md", "Git Subversion Bzr")
 		CommitFile("README_5.md", "Git Subversion Bzr")
 		CommitFile("README_6.md", "Git Subversion Bzr")
-		RunGitGsub("Bzr", "Mercurial")
+		_, err := RunGitGsub("Bzr", "Mercurial")
+
+		if err != nil {
+			t.Errorf("Command failed: %s", err)
+		}
 
 		dat, _ := ioutil.ReadFile("./README_1.md")
 		if string(dat) != "Git Subversion Mercurial" {
@@ -153,7 +165,11 @@ func TestSubstitutionWithPath(t *testing.T) {
 		CommitFile("foo/git", "Git Subversion Bzr")
 		CommitFile("bar/git", "Git Subversion Bzr")
 
-		RunGitGsub("Git", "Svn", "foo")
+		_, err := RunGitGsub("Git", "Svn", "foo")
+
+		if err != nil {
+			t.Errorf("Command failed: %s", err)
+		}
 
 		dat, _ := ioutil.ReadFile("./README.md")
 		if string(dat) != "Git Subversion Bzr" {
@@ -170,7 +186,12 @@ func TestSubstitutionWithPath(t *testing.T) {
 func TestSubstitutionWithCaseConversion(t *testing.T) {
 	RunInTmpRepo(func() {
 		CommitFile("README.md", "GitGsub git_gsub git-gsub")
-		RunGitGsub("--camel", "--kebab", "--snake", "git-gsub", "svn-gsub")
+		_, err := RunGitGsub("--camel", "--kebab", "--snake", "git-gsub", "svn-gsub")
+
+		if err != nil {
+			t.Errorf("Command failed: %s", err)
+		}
+
 		dat, _ := ioutil.ReadFile("./README.md")
 		if string(dat) != "SvnGsub svn_gsub svn-gsub" {
 			t.Errorf("Failed: %s", string(dat))
@@ -181,7 +202,11 @@ func TestSubstitutionWithCaseConversion(t *testing.T) {
 func TestSubstitutionOfAllUnderscoredPhraseWithCaseConversion(t *testing.T) {
 	RunInTmpRepo(func() {
 		CommitFile("README.md", "activerecord")
-		RunGitGsub("activerecord", "inactiverecord", "--kebab", "--snake", "--camel")
+		_, err := RunGitGsub("activerecord", "inactiverecord", "--kebab", "--snake", "--camel")
+
+		if err != nil {
+			t.Errorf("Command failed: %s", err)
+		}
 
 		dat, _ := ioutil.ReadFile("./README.md")
 		if string(dat) != "inactiverecord" {
@@ -193,7 +218,12 @@ func TestSubstitutionOfAllUnderscoredPhraseWithCaseConversion(t *testing.T) {
 func TestOptionsCanBePutAfterArguments(t *testing.T) {
 	RunInTmpRepo(func() {
 		CommitFile("README.md", "GitGsub git_gsub git-gsub")
-		RunGitGsub("git-gsub", "svn-gsub", "--camel", "--kebab", "--snake")
+		_, err := RunGitGsub("git-gsub", "svn-gsub", "--camel", "--kebab", "--snake")
+
+		if err != nil {
+			t.Errorf("Command failed: %s", err)
+		}
+
 		dat, _ := ioutil.ReadFile("./README.md")
 		if string(dat) != "SvnGsub svn_gsub svn-gsub" {
 			t.Errorf("Failed: %s", string(dat))
@@ -204,8 +234,17 @@ func TestOptionsCanBePutAfterArguments(t *testing.T) {
 func TestSubstitutionWithFixedStringOption(t *testing.T) {
 	RunInTmpRepo(func() {
 		CommitFile("hello.rb", "puts('hello')")
-		RunGitGsub("--fgrep", "(", " ")
-		RunGitGsub("-F", ")", "")
+
+		_, err := RunGitGsub("--fgrep", "(", " ")
+		if err != nil {
+			t.Errorf("Command failed: %s", err)
+		}
+
+		_, err = RunGitGsub("-F", ")", "")
+		if err != nil {
+			t.Errorf("Command failed: %s", err)
+		}
+
 		dat, _ := ioutil.ReadFile("./hello.rb")
 		if string(dat) != "puts 'hello'" {
 			t.Errorf("Failed: %s", string(dat))
@@ -216,7 +255,12 @@ func TestSubstitutionWithFixedStringOption(t *testing.T) {
 func TestEscape(t *testing.T) {
 	RunInTmpRepo(func() {
 		CommitFile("README.md", `<h1 class="foo">`)
-		RunGitGsub(`<h1 class="foo">`, `<h1 class="bar">`)
+		_, err := RunGitGsub(`<h1 class="foo">`, `<h1 class="bar">`)
+
+		if err != nil {
+			t.Errorf("Command failed: %s", err)
+		}
+
 		dat, _ := ioutil.ReadFile("./README.md")
 		if string(dat) != `<h1 class="bar">` {
 			t.Errorf("Failed: %s", string(dat))
@@ -227,7 +271,11 @@ func TestEscape(t *testing.T) {
 func TestAtMark(t *testing.T) {
 	RunInTmpRepo(func() {
 		CommitFile("README.md", "foo@example.com")
-		RunGitGsub("foo@example.com", "bar@example.com")
+		_, err := RunGitGsub("foo@example.com", "bar@example.com")
+		if err != nil {
+			t.Errorf("Command failed: %s", err)
+		}
+
 		dat, _ := ioutil.ReadFile("./README.md")
 		if string(dat) != "bar@example.com" {
 			t.Errorf("Failed: %s", string(dat))
@@ -238,7 +286,11 @@ func TestAtMark(t *testing.T) {
 func TestConsequesingAtMark(t *testing.T) {
 	RunInTmpRepo(func() {
 		CommitFile("README.md", "foo@example.com")
-		RunGitGsub("foo@example.com", "bar@@example.com")
+		_, err := RunGitGsub("foo@example.com", "bar@@example.com")
+		if err != nil {
+			t.Errorf("Command failed: %s", err)
+		}
+
 		dat, _ := ioutil.ReadFile("./README.md")
 		if string(dat) != "bar@@example.com" {
 			t.Errorf("Failed: %s", string(dat))
@@ -249,7 +301,11 @@ func TestConsequesingAtMark(t *testing.T) {
 func TestDoubleQuoteToSingleQuote(t *testing.T) {
 	RunInTmpRepo(func() {
 		CommitFile("README.md", `hello this is "git"`)
-		RunGitGsub(`"git"`, `'svn'`)
+		_, err := RunGitGsub(`"git"`, `'svn'`)
+		if err != nil {
+			t.Errorf("Command failed: %s", err)
+		}
+
 		dat, _ := ioutil.ReadFile("./README.md")
 		if string(dat) != "hello this is 'svn'" {
 			t.Errorf("Failed: %s", string(dat))
@@ -260,7 +316,11 @@ func TestDoubleQuoteToSingleQuote(t *testing.T) {
 func TestSingleQuoteToDoubleQuote(t *testing.T) {
 	RunInTmpRepo(func() {
 		CommitFile("README.md", `hello this is 'git'`)
-		RunGitGsub(`'git'`, `"svn"`)
+		_, err := RunGitGsub(`'git'`, `"svn"`)
+		if err != nil {
+			t.Errorf("Command failed: %s", err)
+		}
+
 		dat, _ := ioutil.ReadFile("./README.md")
 		if string(dat) != `hello this is "svn"` {
 			t.Errorf("Failed: %s", string(dat))
@@ -271,7 +331,11 @@ func TestSingleQuoteToDoubleQuote(t *testing.T) {
 func TestBracket(t *testing.T) {
 	RunInTmpRepo(func() {
 		CommitFile("README.md", `{git{svn}}`)
-		RunGitGsub("{git{svn}}", "{hg{svn}}")
+		_, err := RunGitGsub("{git{svn}}", "{hg{svn}}")
+		if err != nil {
+			t.Errorf("Command failed: %s", err)
+		}
+
 		dat, _ := ioutil.ReadFile("./README.md")
 		if string(dat) != "{hg{svn}}" {
 			t.Errorf("Failed: %s", string(dat))
@@ -282,7 +346,11 @@ func TestBracket(t *testing.T) {
 func TestSubmatch(t *testing.T) {
 	RunInTmpRepo(func() {
 		CommitFile("README.md", "git-foo-1 git-bar-22 git-baz-3")
-		RunGitGsub(`git-([a-z]+)-([\d]{1,2})`, `$2-$1`)
+		_, err := RunGitGsub(`git-([a-z]+)-([\d]{1,2})`, `$2-$1`)
+		if err != nil {
+			t.Errorf("Command failed: %s", err)
+		}
+
 		dat, _ := ioutil.ReadFile("./README.md")
 		if string(dat) != "1-foo 22-bar 3-baz" {
 			t.Errorf("Failed: %s", string(dat))
@@ -293,7 +361,11 @@ func TestSubmatch(t *testing.T) {
 func TestSubstituteToEmptyString(t *testing.T) {
 	RunInTmpRepo(func() {
 		CommitFile("README.md", "Git Svn Hg")
-		RunGitGsub("Svn ", "")
+		_, err := RunGitGsub("Svn ", "")
+		if err != nil {
+			t.Errorf("Command failed: %s", err)
+		}
+
 		dat, _ := ioutil.ReadFile("./README.md")
 		if string(dat) != "Git Hg" {
 			t.Errorf("Failed: %s", string(dat))
@@ -304,7 +376,11 @@ func TestSubstituteToEmptyString(t *testing.T) {
 func TestUTF8Filename(t *testing.T) {
 	RunInTmpRepo(func() {
 		CommitFile("よんでね.txt", "よんでね")
-		RunGitGsub("でね", "だよ")
+		_, err := RunGitGsub("でね", "だよ")
+		if err != nil {
+			t.Errorf("Command failed: %s", err)
+		}
+
 		dat, _ := ioutil.ReadFile("./よんでね.txt")
 		if string(dat) != "よんだよ" {
 			t.Errorf("Failed: %s", string(dat))
@@ -315,7 +391,11 @@ func TestUTF8Filename(t *testing.T) {
 func TestSimpleRename(t *testing.T) {
 	RunInTmpRepo(func() {
 		CommitFile("README-git_gsub.md", "GitGsub git_gsub git-gsub")
-		RunGitGsub("--snake", "--rename", "GitGsub", "SvnGsub")
+		_, err := RunGitGsub("--snake", "--rename", "GitGsub", "SvnGsub")
+		if err != nil {
+			t.Errorf("Command failed: %s", err)
+		}
+
 		dat, _ := ioutil.ReadFile("./README-svn_gsub.md")
 		if string(dat) != "SvnGsub svn_gsub git-gsub" {
 			t.Errorf("Failed: %s", string(dat))
@@ -326,7 +406,11 @@ func TestSimpleRename(t *testing.T) {
 func TestRuby(t *testing.T) {
 	RunInTmpRepo(func() {
 		CommitFile("./foo_bar/baz.rb", "module FooBar::Baz; foo_bar baz # foo_bar/baz; end")
-		RunGitGsub("--ruby", "--rename", "FooBar::Baz", "QuxQuux::Quuz")
+		_, err := RunGitGsub("--ruby", "--rename", "FooBar::Baz", "QuxQuux::Quuz")
+		if err != nil {
+			t.Errorf("Command failed: %s", err)
+		}
+
 		dat, _ := ioutil.ReadFile("./qux_quux/quuz.rb")
 		if string(dat) != "module QuxQuux::Quuz; foo_bar baz # qux_quux/quuz; end" {
 			t.Errorf("Failed: %s", string(dat))
@@ -337,7 +421,11 @@ func TestRuby(t *testing.T) {
 func TestAll(t *testing.T) {
 	RunInTmpRepo(func() {
 		CommitFile("./foo_bar/baz.rb", "module FooBar::Baz; foo_bar baz # foo_bar/baz; end")
-		RunGitGsub("--all", "--rename", "FooBar::Baz", "QuxQuux::Quuz")
+		_, err := RunGitGsub("--all", "--rename", "FooBar::Baz", "QuxQuux::Quuz")
+		if err != nil {
+			t.Errorf("Command failed: %s", err)
+		}
+
 		dat, _ := ioutil.ReadFile("./qux_quux/quuz.rb")
 		if string(dat) != "module QuxQuux::Quuz; foo_bar baz # qux_quux/quuz; end" {
 			t.Errorf("Failed: %s", string(dat))
@@ -346,7 +434,11 @@ func TestAll(t *testing.T) {
 
 	RunInTmpRepo(func() {
 		CommitFile("./foo_bar.rb", "module FooBar; foo_bar foo-bar; end")
-		RunGitGsub("--all", "--rename", "FooBar", "BazQux")
+		_, err := RunGitGsub("--all", "--rename", "FooBar", "BazQux")
+		if err != nil {
+			t.Errorf("Command failed: %s", err)
+		}
+
 		dat, _ := ioutil.ReadFile("./baz_qux.rb")
 		if string(dat) != "module BazQux; baz_qux baz-qux; end" {
 			t.Errorf("Failed: %s", string(dat))
@@ -358,7 +450,10 @@ func TestRenameWithPath(t *testing.T) {
 	RunInTmpRepo(func() {
 		CommitFile("foo/git.rb", "puts 'Git'")
 		CommitFile("bar/git.rb", "puts 'Git'")
-		RunGitGsub("git", "svn", "bar", "--rename")
+		_, err := RunGitGsub("git", "svn", "bar", "--rename")
+		if err != nil {
+			t.Errorf("Command failed: %s", err)
+		}
 
 		dat, _ := ioutil.ReadFile("./foo/git.rb")
 		if string(dat) != "puts 'Git'" {
@@ -377,7 +472,10 @@ func TestRenameWithSubmatch(t *testing.T) {
 		CommitFile("git/lib.rb", "puts 'Git'")
 		CommitFile("svn/lib.rb", "puts 'Git'")
 		CommitFile("bzr/lib.rb", "puts 'Git'")
-		RunGitGsub("--rename", "(git|svn|bzr)/lib", "lib/$1")
+		_, err := RunGitGsub("--rename", "(git|svn|bzr)/lib", "lib/$1")
+		if err != nil {
+			t.Errorf("Command failed: %s", err)
+		}
 
 		for _, path := range []string{"git", "svn", "bzr"} {
 			files, _ := ioutil.ReadDir(path)
@@ -403,8 +501,12 @@ func TestRenameWithSubmatch(t *testing.T) {
 func TestRenameWithSpaceInPath(t *testing.T) {
 	RunInTmpRepo(func() {
 		CommitFile("git/l b.rb", "puts 'Git'")
-		RunGitGsub("--rename", "l b.rb", "lib.rb")
-		_, err := ioutil.ReadFile("git/lib.rb")
+		_, err := RunGitGsub("--rename", "l b.rb", "lib.rb")
+		if err != nil {
+			t.Errorf("Command failed: %s", err)
+		}
+
+		_, err = ioutil.ReadFile("git/lib.rb")
 		if err != nil {
 			t.Errorf("Failed")
 		}
