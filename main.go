@@ -27,8 +27,6 @@ type Substitution struct {
 	to string
 }
 
-type Substitutions = map[string]Substitution
-
 func getAllFiles(paths []string) ([]string, error) {
 	var args []string
 	args = append(args, "ls-files")
@@ -44,7 +42,7 @@ func getAllFiles(paths []string) ([]string, error) {
 	return lines, nil
 }
 
-func runSubstitionsAndRenames(substitutions Substitutions, rename bool, path string) error {
+func runSubstitionsAndRenames(substitutions map[string]Substitution, rename bool, path string) error {
 	if path == "" {
 		return nil
 	}
@@ -118,6 +116,12 @@ func ToRubyModule(str string) string {
 	return strings.Replace(result, "/", "::", -1)
 }
 
+func addSub(substitutions *map[string]Substitution, from string, to string, conv func(string) string) {
+	f := conv(from)
+	t := conv(to)
+	(*substitutions)[f] = Substitution{regexp.MustCompile(f), t}
+}
+
 func (cli *CLI) Run(_args []string) int {
 	flag.CommandLine = flag.NewFlagSet(os.Args[0], flag.ExitOnError)
 
@@ -159,26 +163,21 @@ func (cli *CLI) Run(_args []string) int {
 
 	substitutions := map[string]Substitution{}
 
-	substitutions[rawFrom] = Substitution{regexp.MustCompile(rawFrom), to}
+	addSub(&substitutions, rawFrom, to, func(x string) string { return x })
 
 	if *snake || *all {
-		snakeFrom := strcase.ToSnake(rawFrom)
-		substitutions[snakeFrom] = Substitution{regexp.MustCompile(snakeFrom), strcase.ToSnake(to)}
+		addSub(&substitutions, rawFrom, to, strcase.ToSnake)
 	}
 	if *kebab || *all {
-		kebabFrom := strcase.ToKebab(rawFrom)
-		substitutions[kebabFrom] = Substitution{regexp.MustCompile(kebabFrom), strcase.ToKebab(to)}
+		addSub(&substitutions, rawFrom, to, strcase.ToKebab)
 	}
 	if *camel || *all {
-		camelFrom := strcase.ToCamel(rawFrom)
-		substitutions[camelFrom] = Substitution{regexp.MustCompile(camelFrom), strcase.ToCamel(to)}
+		addSub(&substitutions, rawFrom, to, strcase.ToCamel)
 	}
 
 	if *ruby || *all {
-		rubyDirectoryFrom := ToRubyDirectory(rawFrom)
-		substitutions[rubyDirectoryFrom] = Substitution{regexp.MustCompile(rubyDirectoryFrom), ToRubyDirectory(to)}
-		rubyModuleFrom := ToRubyModule(rawFrom)
-		substitutions[rubyModuleFrom] = Substitution{regexp.MustCompile(rubyModuleFrom), ToRubyModule(to)}
+		addSub(&substitutions, rawFrom, to, ToRubyDirectory)
+		addSub(&substitutions, rawFrom, to, ToRubyModule)
 	}
 
 	files, err := getAllFiles(targetPaths)
