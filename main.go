@@ -139,7 +139,7 @@ func (cli *CLI) Run(_args []string) int {
 	args := flag.Args()
 
 	if *version {
-		fmt.Fprintf(cli.outStream, Version)
+		fmt.Fprintln(cli.outStream, Version)
 		return 0
 	}
 
