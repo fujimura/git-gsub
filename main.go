@@ -108,12 +108,23 @@ func getMaxProcs() (int, error) {
 	return maxProcs, nil
 }
 
+func ToRubyDirectory(str string) string {
+	result := strcase.ToSnake(str)
+	return strings.Replace(result, "::", "/", -1)
+}
+
+func ToRubyModule(str string) string {
+	result := strcase.ToCamel(str)
+	return strings.Replace(result, "/", "::", -1)
+}
+
 func (cli *CLI) Run(_args []string) int {
 	flag.CommandLine = flag.NewFlagSet(os.Args[0], flag.ExitOnError)
 
 	var snake = flag.Bool("snake", false, "Substitute snake-cased expressions")
 	var kebab = flag.Bool("kebab", false, "Substitute kebab-cased expressions")
 	var camel = flag.Bool("camel", false, "Substitute camel-cased expressions")
+	var ruby = flag.Bool("ruby", false, "Substitute Ruby module and directory expressions")
 	var rename = flag.Bool("rename", false, "Rename files with expression")
 	var fgrep = flag.BoolP("fgrep", "F", false, "Interpret given pattern as a fixed string")
 	var version = flag.Bool("version", false, "Show version")
@@ -160,6 +171,13 @@ func (cli *CLI) Run(_args []string) int {
 	if *camel {
 		camelFrom := strcase.ToCamel(rawFrom)
 		substitutions[camelFrom] = Substitution{regexp.MustCompile(camelFrom), strcase.ToCamel(to)}
+	}
+
+	if *ruby {
+		rubyDirectoryFrom := ToRubyDirectory(rawFrom)
+		substitutions[rubyDirectoryFrom] = Substitution{regexp.MustCompile(rubyDirectoryFrom), ToRubyDirectory(to)}
+		rubyModuleFrom := ToRubyModule(rawFrom)
+		substitutions[rubyModuleFrom] = Substitution{regexp.MustCompile(rubyModuleFrom), ToRubyModule(to)}
 	}
 
 	files, err := getAllFiles(targetPaths)

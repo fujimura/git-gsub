@@ -323,6 +323,17 @@ func TestSimpleRename(t *testing.T) {
 	})
 }
 
+func TestRuby(t *testing.T) {
+	RunInTmpRepo(func() {
+		CommitFile("./foo_bar/baz.rb", "module FooBar::Baz; foo_bar baz # foo_bar/baz; end")
+		RunGitGsub("--ruby", "--rename", "FooBar::Baz", "QuxQuux::Quuz")
+		dat, _ := ioutil.ReadFile("./qux_quux/quuz.rb")
+		if string(dat) != "module QuxQuux::Quuz; foo_bar baz # qux_quux/quuz; end" {
+			t.Errorf("Failed: %s", string(dat))
+		}
+	})
+}
+
 func TestRenameWithPath(t *testing.T) {
 	RunInTmpRepo(func() {
 		CommitFile("foo/git.rb", "puts 'Git'")
