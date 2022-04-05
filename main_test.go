@@ -353,6 +353,21 @@ func TestSubmatch(t *testing.T) {
 	})
 }
 
+func TestSubmatchFollowedByUnderscore(t *testing.T) {
+	RunInTmpRepo(func() {
+		CommitFile("README.md", "git_foo_1 git_bar_22 git_baz_3")
+		_, err := RunGitGsub(`git_([a-z]+)_([\d]{1,2})`, `$2_$1`)
+		if err != nil {
+			t.Errorf("Command failed: %s", err)
+		}
+
+		dat, _ := ioutil.ReadFile("./README.md")
+		if string(dat) != "1_foo 22_bar 3_baz" {
+			t.Errorf("Failed: %s", string(dat))
+		}
+	})
+}
+
 func TestSubstituteToEmptyString(t *testing.T) {
 	RunInTmpRepo(func() {
 		CommitFile("README.md", "Git Svn Hg")
