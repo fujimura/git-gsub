@@ -203,12 +203,10 @@ func (cli *CLI) Run(_args []string) int {
 		go func(path_ string) {
 			cn <- true
 			err := runSubstitionsAndRenames(substitutions, *rename, path_)
-			if err == nil {
-				<-cn
-			} else {
+			if err != nil {
 				errCn <- err
-				close(cn)
 			}
+			<-cn
 			wg.Done()
 		}(path)
 	}
