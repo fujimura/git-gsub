@@ -1,6 +1,12 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [0.1.2]
+
+### Fixed
+
+- Fix occasional panic on invalid symlink[#25](https://github.com/fujimura/git-gsub/pull/25) Thanks @akihiro17!
+
 ## [0.1.1]
 
 ### Fixed
