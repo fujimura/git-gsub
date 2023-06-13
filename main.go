@@ -124,6 +124,7 @@ func addSub(substitutions *map[string]Substitution, from string, to string, conv
 
 func (cli *CLI) Run(_args []string) int {
 	flag.CommandLine = flag.NewFlagSet(os.Args[0], flag.ExitOnError)
+	flag.CommandLine.SortFlags = false
 
 	var snake = flag.Bool("snake", false, "Substitute snake-cased expressions")
 	var kebab = flag.Bool("kebab", false, "Substitute kebab-cased expressions")
