@@ -194,6 +194,22 @@ func TestSubstitutionWithCaseConversion(t *testing.T) {
 	})
 }
 
+func TestSubstitutionWithUpperAndLowerCamelCaseConversion(t *testing.T) {
+	RunInTmpRepo(func() {
+		CommitFile("README.md", "GitGsub gitGsub")
+		_, err := RunGitGsub("--upper-camel", "--lower-camel", "git-gsub", "svn-gsub")
+
+		if err != nil {
+			t.Errorf("Command failed: %s", err)
+		}
+
+		dat, _ := ioutil.ReadFile("./README.md")
+		if string(dat) != "SvnGsub svnGsub" {
+			t.Errorf("Failed: %s", string(dat))
+		}
+	})
+}
+
 func TestSubstitutionOfAllUnderscoredPhraseWithCaseConversion(t *testing.T) {
 	RunInTmpRepo(func() {
 		CommitFile("README.md", "activerecord")

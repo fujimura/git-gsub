@@ -124,10 +124,13 @@ func addSub(substitutions *map[string]Substitution, from string, to string, conv
 
 func (cli *CLI) Run(_args []string) int {
 	flag.CommandLine = flag.NewFlagSet(os.Args[0], flag.ExitOnError)
+	flag.CommandLine.SortFlags = false
 
 	var snake = flag.Bool("snake", false, "Substitute snake-cased expressions")
 	var kebab = flag.Bool("kebab", false, "Substitute kebab-cased expressions")
-	var camel = flag.Bool("camel", false, "Substitute camel-cased expressions")
+	var camel = flag.Bool("camel", false, "Substitute (upper) camel-cased expressions")
+	var upperCamel = flag.Bool("upper-camel", false, "Substitute upper-camel-cased expressions")
+	var lowerCamel = flag.Bool("lower-camel", false, "Substitute lower-camel-cased expressions")
 	var all = flag.BoolP("all", "a", false, "Substitute (snake|kebab|camel)-cased expressions")
 	var ruby = flag.Bool("ruby", false, "Substitute Ruby module and directory expressions")
 	var rename = flag.BoolP("rename", "r", false, "Rename files with expression")
@@ -171,8 +174,11 @@ func (cli *CLI) Run(_args []string) int {
 	if *kebab || *all {
 		addSub(&substitutions, rawFrom, to, strcase.ToKebab)
 	}
-	if *camel || *all {
+	if *camel || *upperCamel || *all {
 		addSub(&substitutions, rawFrom, to, strcase.ToCamel)
+	}
+	if *lowerCamel || *all {
+		addSub(&substitutions, rawFrom, to, strcase.ToLowerCamel)
 	}
 
 	if *ruby {
