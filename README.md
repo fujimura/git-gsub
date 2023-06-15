@@ -9,12 +9,16 @@ $ git gsub
 Usage git gsub [options] FROM TO [PATHS]
 
 Options:
-      --camel       Substitute camel-cased expressions
-      --kebab       Substitute kebab-cased expressions
-      --rename      Rename files with expression
-      --snake       Substitute snake-cased expressions
-      -F, --fgrep   Interpret given pattern as a fixed string
-      --version     Show version
+      --snake         Substitute snake-cased expressions
+      --kebab         Substitute kebab-cased expressions
+      --camel         Substitute (upper) camel-cased expressions
+      --upper-camel   Substitute upper-camel-cased expressions
+      --lower-camel   Substitute lower-camel-cased expressions
+  -a, --all           Substitute (snake|kebab|camel)-cased expressions
+      --ruby          Substitute Ruby module and directory expressions
+  -r, --rename        Rename files with expression
+  -F, --fgrep         Interpret given pattern as a fixed string
+  -v, --version       Show version
 ```
 
 ## Example
@@ -102,7 +106,7 @@ index 0000000..312f137
 ## Installation
 
 ```
-$ go get github.com/fujimura/git-gsub
+$ go install github.com/fujimura/git-gsub@latest
 ```
 
 ## Contributing
