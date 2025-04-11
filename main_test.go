@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
-	"io/ioutil"
 	"log"
 	"os"
 	"os/exec"
@@ -14,7 +13,7 @@ import (
 )
 
 func RunInTmpDir(run func()) {
-	dir, err := ioutil.TempDir("", "")
+	dir, err := os.MkdirTemp("", "")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -505,13 +504,13 @@ func TestRenameWithSubmatch(t *testing.T) {
 		}
 
 		for _, path := range []string{"git", "svn", "bzr"} {
-			files, _ := ioutil.ReadDir(path)
+			files, _ := os.ReadDir(path)
 			if len(files) != 0 {
 				t.Errorf("Failed: %d", len(files))
 			}
 		}
 
-		files, _ := ioutil.ReadDir("./lib")
+		files, _ := os.ReadDir("./lib")
 		if len(files) != 3 {
 			t.Errorf("Failed: %d", len(files))
 		}
