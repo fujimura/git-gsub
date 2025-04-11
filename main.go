@@ -15,7 +15,7 @@ import (
 	flag "github.com/spf13/pflag"
 )
 
-const Version string = "v0.1.2"
+const Version string = "v0.1.3"
 
 type CLI struct {
 	outStream, errStream io.Writer
