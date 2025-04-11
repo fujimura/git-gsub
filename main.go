@@ -131,6 +131,7 @@ func (cli *CLI) Run(_args []string) int {
 	var camel = flag.Bool("camel", false, "Substitute (upper) camel-cased expressions")
 	var upperCamel = flag.Bool("upper-camel", false, "Substitute upper-camel-cased expressions")
 	var lowerCamel = flag.Bool("lower-camel", false, "Substitute lower-camel-cased expressions")
+	var screamingSnake = flag.Bool("screaming-snake", false, "Substitute screaming-snake-cased expressions")
 	var all = flag.BoolP("all", "a", false, "Substitute (snake|kebab|camel)-cased expressions")
 	var ruby = flag.Bool("ruby", false, "Substitute Ruby module and directory expressions")
 	var rename = flag.BoolP("rename", "r", false, "Rename files with expression")
@@ -179,6 +180,9 @@ func (cli *CLI) Run(_args []string) int {
 	}
 	if *lowerCamel || *all {
 		addSub(&substitutions, rawFrom, to, strcase.ToLowerCamel)
+	}
+	if *screamingSnake {
+		addSub(&substitutions, rawFrom, to, strcase.ToScreamingSnake)
 	}
 
 	if *ruby {

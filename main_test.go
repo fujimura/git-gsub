@@ -180,15 +180,15 @@ func TestSubstitutionWithPath(t *testing.T) {
 
 func TestSubstitutionWithCaseConversion(t *testing.T) {
 	RunInTmpRepo(func() {
-		CommitFile("README.md", "GitGsub git_gsub git-gsub")
-		_, err := RunGitGsub("--camel", "--kebab", "--snake", "git-gsub", "svn-gsub")
+		CommitFile("README.md", "GitGsub git_gsub git-gsub GIT_GSUB")
+		_, err := RunGitGsub("--camel", "--kebab", "--snake", "--screaming-snake", "git-gsub", "svn-gsub")
 
 		if err != nil {
 			t.Errorf("Command failed: %s", err)
 		}
 
 		dat, _ := ioutil.ReadFile("./README.md")
-		if string(dat) != "SvnGsub svn_gsub svn-gsub" {
+		if string(dat) != "SvnGsub svn_gsub svn-gsub SVN_GSUB" {
 			t.Errorf("Failed: %s", string(dat))
 		}
 	})
