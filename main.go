@@ -147,9 +147,9 @@ func (cli *CLI) Run(_args []string) int {
 	}
 
 	if len(args) < 2 {
-		fmt.Fprintf(cli.errStream, "Usage git gsub [options] FROM TO [PATHS]\n")
-		fmt.Fprintf(cli.errStream, "\nOptions:\n")
-		fmt.Fprintf(cli.errStream, flag.CommandLine.FlagUsages())
+		fmt.Fprint(cli.errStream, "Usage git gsub [options] FROM TO [PATHS]\n")
+		fmt.Fprint(cli.errStream, "\nOptions:\n")
+		fmt.Fprint(cli.errStream, flag.CommandLine.FlagUsages())
 		return 1
 	}
 
