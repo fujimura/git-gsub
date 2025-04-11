@@ -62,7 +62,7 @@ func CommitFile(name string, content string) {
 		panic(err)
 	}
 
-	err = ioutil.WriteFile(name, []byte(content), os.ModePerm)
+	err = os.WriteFile(name, []byte(content), os.ModePerm)
 	if err != nil {
 		panic(err)
 	}
@@ -126,7 +126,7 @@ func TestSimpleSubstitution(t *testing.T) {
 			t.Errorf("Command failed: %s", err)
 		}
 
-		dat, _ := ioutil.ReadFile("./README.md")
+		dat, _ := os.ReadFile("./README.md")
 		if string(dat) != "Git Subversion Mercurial" {
 			t.Errorf("Failed: %s", string(dat))
 		}
@@ -147,7 +147,7 @@ func TestSimpleSubstitutionManyFiles(t *testing.T) {
 			t.Errorf("Command failed: %s", err)
 		}
 
-		dat, _ := ioutil.ReadFile("./README_1.md")
+		dat, _ := os.ReadFile("./README_1.md")
 		if string(dat) != "Git Subversion Mercurial" {
 			t.Errorf("Failed: %s", string(dat))
 		}
@@ -166,12 +166,12 @@ func TestSubstitutionWithPath(t *testing.T) {
 			t.Errorf("Command failed: %s", err)
 		}
 
-		dat, _ := ioutil.ReadFile("./README.md")
+		dat, _ := os.ReadFile("./README.md")
 		if string(dat) != "Git Subversion Bzr" {
 			t.Errorf("Failed: %s", string(dat))
 		}
 
-		dat, _ = ioutil.ReadFile("./foo/git")
+		dat, _ = os.ReadFile("./foo/git")
 		if string(dat) != "Svn Subversion Bzr" {
 			t.Errorf("Failed: %s", string(dat))
 		}
@@ -187,7 +187,7 @@ func TestSubstitutionWithCaseConversion(t *testing.T) {
 			t.Errorf("Command failed: %s", err)
 		}
 
-		dat, _ := ioutil.ReadFile("./README.md")
+		dat, _ := os.ReadFile("./README.md")
 		if string(dat) != "SvnGsub svn_gsub svn-gsub SVN_GSUB" {
 			t.Errorf("Failed: %s", string(dat))
 		}
@@ -203,7 +203,7 @@ func TestSubstitutionWithUpperAndLowerCamelCaseConversion(t *testing.T) {
 			t.Errorf("Command failed: %s", err)
 		}
 
-		dat, _ := ioutil.ReadFile("./README.md")
+		dat, _ := os.ReadFile("./README.md")
 		if string(dat) != "SvnGsub svnGsub" {
 			t.Errorf("Failed: %s", string(dat))
 		}
@@ -219,7 +219,7 @@ func TestSubstitutionOfAllUnderscoredPhraseWithCaseConversion(t *testing.T) {
 			t.Errorf("Command failed: %s", err)
 		}
 
-		dat, _ := ioutil.ReadFile("./README.md")
+		dat, _ := os.ReadFile("./README.md")
 		if string(dat) != "inactiverecord" {
 			t.Errorf("Failed: %s", string(dat))
 		}
@@ -235,7 +235,7 @@ func TestOptionsCanBePutAfterArguments(t *testing.T) {
 			t.Errorf("Command failed: %s", err)
 		}
 
-		dat, _ := ioutil.ReadFile("./README.md")
+		dat, _ := os.ReadFile("./README.md")
 		if string(dat) != "SvnGsub svn_gsub svn-gsub" {
 			t.Errorf("Failed: %s", string(dat))
 		}
@@ -256,7 +256,7 @@ func TestSubstitutionWithFixedStringOption(t *testing.T) {
 			t.Errorf("Command failed: %s", err)
 		}
 
-		dat, _ := ioutil.ReadFile("./hello.rb")
+		dat, _ := os.ReadFile("./hello.rb")
 		if string(dat) != "puts 'hello'" {
 			t.Errorf("Failed: %s", string(dat))
 		}
@@ -272,7 +272,7 @@ func TestEscape(t *testing.T) {
 			t.Errorf("Command failed: %s", err)
 		}
 
-		dat, _ := ioutil.ReadFile("./README.md")
+		dat, _ := os.ReadFile("./README.md")
 		if string(dat) != `<h1 class="bar">` {
 			t.Errorf("Failed: %s", string(dat))
 		}
@@ -287,7 +287,7 @@ func TestAtMark(t *testing.T) {
 			t.Errorf("Command failed: %s", err)
 		}
 
-		dat, _ := ioutil.ReadFile("./README.md")
+		dat, _ := os.ReadFile("./README.md")
 		if string(dat) != "bar@example.com" {
 			t.Errorf("Failed: %s", string(dat))
 		}
@@ -302,7 +302,7 @@ func TestConsequesingAtMark(t *testing.T) {
 			t.Errorf("Command failed: %s", err)
 		}
 
-		dat, _ := ioutil.ReadFile("./README.md")
+		dat, _ := os.ReadFile("./README.md")
 		if string(dat) != "bar@@example.com" {
 			t.Errorf("Failed: %s", string(dat))
 		}
@@ -317,7 +317,7 @@ func TestDoubleQuoteToSingleQuote(t *testing.T) {
 			t.Errorf("Command failed: %s", err)
 		}
 
-		dat, _ := ioutil.ReadFile("./README.md")
+		dat, _ := os.ReadFile("./README.md")
 		if string(dat) != "hello this is 'svn'" {
 			t.Errorf("Failed: %s", string(dat))
 		}
@@ -332,7 +332,7 @@ func TestSingleQuoteToDoubleQuote(t *testing.T) {
 			t.Errorf("Command failed: %s", err)
 		}
 
-		dat, _ := ioutil.ReadFile("./README.md")
+		dat, _ := os.ReadFile("./README.md")
 		if string(dat) != `hello this is "svn"` {
 			t.Errorf("Failed: %s", string(dat))
 		}
@@ -347,7 +347,7 @@ func TestBracket(t *testing.T) {
 			t.Errorf("Command failed: %s", err)
 		}
 
-		dat, _ := ioutil.ReadFile("./README.md")
+		dat, _ := os.ReadFile("./README.md")
 		if string(dat) != "{hg{svn}}" {
 			t.Errorf("Failed: %s", string(dat))
 		}
@@ -362,7 +362,7 @@ func TestSubmatch(t *testing.T) {
 			t.Errorf("Command failed: %s", err)
 		}
 
-		dat, _ := ioutil.ReadFile("./README.md")
+		dat, _ := os.ReadFile("./README.md")
 		if string(dat) != "1-foo 22-bar 3-baz" {
 			t.Errorf("Failed: %s", string(dat))
 		}
@@ -377,7 +377,7 @@ func TestSubstituteToEmptyString(t *testing.T) {
 			t.Errorf("Command failed: %s", err)
 		}
 
-		dat, _ := ioutil.ReadFile("./README.md")
+		dat, _ := os.ReadFile("./README.md")
 		if string(dat) != "Git Hg" {
 			t.Errorf("Failed: %s", string(dat))
 		}
@@ -392,7 +392,7 @@ func TestUTF8Filename(t *testing.T) {
 			t.Errorf("Command failed: %s", err)
 		}
 
-		dat, _ := ioutil.ReadFile("./よんでね.txt")
+		dat, _ := os.ReadFile("./よんでね.txt")
 		if string(dat) != "よんだよ" {
 			t.Errorf("Failed: %s", string(dat))
 		}
@@ -407,7 +407,7 @@ func TestSimpleRename(t *testing.T) {
 			t.Errorf("Command failed: %s", err)
 		}
 
-		dat, _ := ioutil.ReadFile("./README-svn_gsub.md")
+		dat, _ := os.ReadFile("./README-svn_gsub.md")
 		if string(dat) != "SvnGsub svn_gsub git-gsub" {
 			t.Errorf("Failed: %s", string(dat))
 		}
@@ -422,7 +422,7 @@ func TestRuby(t *testing.T) {
 			t.Errorf("Command failed: %s", err)
 		}
 
-		dat, _ := ioutil.ReadFile("./qux_quux/quuz.rb")
+		dat, _ := os.ReadFile("./qux_quux/quuz.rb")
 		if string(dat) != "module QuxQuux::Quuz; foo_bar baz # qux_quux/quuz; end" {
 			t.Errorf("Failed: %s", string(dat))
 		}
@@ -436,7 +436,7 @@ func TestAll(t *testing.T) {
 			t.Errorf("Command failed: %s", err)
 		}
 
-		dat, _ := ioutil.ReadFile("./baz_qux.rb")
+		dat, _ := os.ReadFile("./baz_qux.rb")
 		if string(dat) != "module BazQux; baz_qux baz-qux; end" {
 			t.Errorf("Failed: %s", string(dat))
 		}
@@ -451,7 +451,7 @@ func TestAllDoesntImplyRuby(t *testing.T) {
 			t.Errorf("Command failed: %s", err)
 		}
 
-		dat, _ := ioutil.ReadFile("./foo_bar/baz.rb")
+		dat, _ := os.ReadFile("./foo_bar/baz.rb")
 		if string(dat) != "module QuxQuux::Quuz; foo_bar baz # foo_bar/baz; end" {
 			t.Errorf("Failed: %s", string(dat))
 		}
@@ -466,7 +466,7 @@ func TestAllPlusRuby(t *testing.T) {
 			t.Errorf("Command failed: %s", err)
 		}
 
-		dat, _ := ioutil.ReadFile("./qux_quux/quuz.rb")
+		dat, _ := os.ReadFile("./qux_quux/quuz.rb")
 		if string(dat) != "FOO_BAR_BAZ=1; module QuxQuux::Quuz; foo_bar baz # qux_quux/quuz; end" {
 			t.Errorf("Failed: %s", string(dat))
 		}
@@ -482,12 +482,12 @@ func TestRenameWithPath(t *testing.T) {
 			t.Errorf("Command failed: %s", err)
 		}
 
-		dat, _ := ioutil.ReadFile("./foo/git.rb")
+		dat, _ := os.ReadFile("./foo/git.rb")
 		if string(dat) != "puts 'Git'" {
 			t.Errorf("Failed: %s", string(dat))
 		}
 
-		dat, _ = ioutil.ReadFile("./bar/svn.rb")
+		dat, _ = os.ReadFile("./bar/svn.rb")
 		if string(dat) != "puts 'Git'" {
 			t.Errorf("Failed: %s", string(dat))
 		}
@@ -517,7 +517,7 @@ func TestRenameWithSubmatch(t *testing.T) {
 		}
 
 		for _, path := range []string{"lib/git.rb", "lib/svn.rb", "lib/bzr.rb"} {
-			dat, _ := ioutil.ReadFile(path)
+			dat, _ := os.ReadFile(path)
 			if string(dat) != "puts 'Git'" {
 				t.Errorf("Failed: %s", string(dat))
 			}
@@ -533,7 +533,7 @@ func TestRenameWithSpaceInPath(t *testing.T) {
 			t.Errorf("Command failed: %s", err)
 		}
 
-		_, err = ioutil.ReadFile("git/lib.rb")
+		_, err = os.ReadFile("git/lib.rb")
 		if err != nil {
 			t.Errorf("Failed")
 		}

@@ -57,7 +57,7 @@ func runSubstitionsAndRenames(substitutions map[string]Substitution, rename bool
 		return err
 	}
 
-	content, err := ioutil.ReadFile(path)
+	content, err := os.ReadFile(path)
 
 	if err != nil {
 		return err
@@ -73,7 +73,7 @@ func runSubstitionsAndRenames(substitutions map[string]Substitution, rename bool
 	}
 
 	if replaced {
-		ioutil.WriteFile(path, content, os.ModePerm)
+		os.WriteFile(path, content, os.ModePerm)
 	}
 
 	if rename {
