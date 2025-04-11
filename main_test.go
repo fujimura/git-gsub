@@ -460,14 +460,14 @@ func TestAllDoesntImplyRuby(t *testing.T) {
 
 func TestAllPlusRuby(t *testing.T) {
 	RunInTmpRepo(func() {
-		CommitFile("./foo_bar/baz.rb", "module FooBar::Baz; foo_bar baz # foo_bar/baz; end")
+		CommitFile("./foo_bar/baz.rb", "FOO_BAR_BAZ=1; module FooBar::Baz; foo_bar baz # foo_bar/baz; end")
 		_, err := RunGitGsub("--all", "--ruby", "--rename", "FooBar::Baz", "QuxQuux::Quuz")
 		if err != nil {
 			t.Errorf("Command failed: %s", err)
 		}
 
 		dat, _ := ioutil.ReadFile("./qux_quux/quuz.rb")
-		if string(dat) != "module QuxQuux::Quuz; foo_bar baz # qux_quux/quuz; end" {
+		if string(dat) != "FOO_BAR_BAZ=1; module QuxQuux::Quuz; foo_bar baz # qux_quux/quuz; end" {
 			t.Errorf("Failed: %s", string(dat))
 		}
 	})
